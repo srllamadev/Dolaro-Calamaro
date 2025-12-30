@@ -12,7 +12,8 @@
         offlineMode: false,
         currentView: 'home',
         keypadValue: '0.00',
-        selectedAsset: 'all'
+        selectedAsset: 'all',
+        sendAsset: 'usdc'
     };
 
     // ===================================
@@ -86,7 +87,18 @@
         statusText: null,
         keypadDisplay: null,
         navItems: null,
-        assetDropdown: null
+        assetDropdown: null,
+        sendView: null,
+        sendAssetDropdown: null,
+        sendAddress: null,
+        sendAmount: null,
+        sendAvailableAmount: null,
+        sendAmountUsd: null,
+        openSendBtn: null,
+        confirmSendBtn: null,
+        scanQrBtn: null,
+        maxButton: null,
+        backButtons: null
     };
 
     // ===================================
@@ -102,6 +114,7 @@
         initNavigation();
         initKeypad();
         initAssetSelector();
+        initSendForm();
         startPriceUpdates();
         
         console.log('✅ Aplicación lista');
@@ -123,6 +136,17 @@
         elements.keypadDisplay = document.getElementById('keypad-display');
         elements.navItems = document.querySelectorAll('.nav-item');
         elements.assetDropdown = document.getElementById('asset-dropdown');
+        elements.sendView = document.getElementById('view-send');
+        elements.sendAssetDropdown = document.getElementById('send-asset-dropdown');
+        elements.sendAddress = document.getElementById('send-address');
+        elements.sendAmount = document.getElementById('send-amount');
+        elements.sendAvailableAmount = document.getElementById('send-available-amount');
+        elements.sendAmountUsd = document.getElementById('send-amount-usd');
+        elements.openSendBtn = document.getElementById('open-send-btn');
+        elements.confirmSendBtn = document.getElementById('confirm-send-btn');
+        elements.scanQrBtn = document.getElementById('scan-qr-btn');
+        elements.maxButton = document.getElementById('max-button');
+        elements.backButtons = document.querySelectorAll('[data-action="back-home"]');
     }
 
     // ===================================
@@ -317,6 +341,209 @@
 
         // Actualizar navegación
         updateNavigation(isOffline ? 'offline' : 'home');
+    }
+
+    // ===================================
+    // FORMULARIO DE ENVÍO
+    // ===================================
+    function initSendForm() {
+        if (!elements.openSendBtn) return;
+
+        // Abrir vista de enviar
+        elements.openSendBtn.addEventListener('click', () => {
+            openSendView();
+        });
+
+        // Botones de volver
+        elements.backButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                closeSendView();
+            });
+        });
+
+        // Cambio de activo a enviar
+        if (elements.sendAssetDropdown) {
+            elements.sendAssetDropdown.addEventListener('change', (e) => {
+                appState.sendAsset = e.target.value;
+                updateSendAvailableBalance();
+                updateSendAmountUsd();
+                console.log('📤 Activo a enviar:', appState.sendAsset);
+            });
+        }
+
+        // Botón MAX
+        if (elements.maxButton) {
+            elements.maxButton.addEventListener('click', () => {
+                const asset = assetsData.find(a => a.id === appState.sendAsset);
+                if (asset && elements.sendAmount) {
+                    elements.sendAmount.value = asset.cryptoAmount.toString();
+                    updateSendAmountUsd();
+                }
+            });
+        }
+
+        // Actualizar USD al cambiar monto
+        if (elements.sendAmount) {
+            elements.sendAmount.addEventListener('input', () => {
+                updateSendAmountUsd();
+            });
+        }
+
+        // Escanear QR (simulado)
+        if (elements.scanQrBtn) {
+            elements.scanQrBtn.addEventListener('click', () => {
+                simulateQrScan();
+            });
+        }
+
+        // Confirmar envío
+        if (elements.confirmSendBtn) {
+            elements.confirmSendBtn.addEventListener('click', () => {
+                processSend();
+            });
+        }
+    }
+
+    function openSendView() {
+        elements.onlineMode.classList.remove('active');
+        elements.sendView.classList.add('active');
+        updateSendAvailableBalance();
+        console.log('📤 Abriendo vista de enviar');
+    }
+
+    function closeSendView() {
+        elements.sendView.classList.remove('active');
+        elements.onlineMode.classList.add('active');
+        // Limpiar formulario
+        if (elements.sendAddress) elements.sendAddress.value = '';
+        if (elements.sendAmount) elements.sendAmount.value = '';
+        console.log('🏠 Volviendo al inicio');
+    }
+
+    function updateSendAvailableBalance() {
+        const asset = assetsData.find(a => a.id === appState.sendAsset);
+        if (asset && elements.sendAvailableAmount) {
+            elements.sendAvailableAmount.textContent = formatCrypto(asset.cryptoAmount, asset.name);
+        }
+    }
+
+    function updateSendAmountUsd() {
+        const asset = assetsData.find(a => a.id === appState.sendAsset);
+        if (!asset || !elements.sendAmount || !elements.sendAmountUsd) return;
+
+        const amount = parseFloat(elements.sendAmount.value) || 0;
+        const pricePerUnit = asset.usdValue / asset.cryptoAmount;
+        const usdValue = amount * pricePerUnit;
+
+        elements.sendAmountUsd.textContent = `≈ $${usdValue.toFixed(2)} USD`;
+    }
+
+    function simulateQrScan() {
+        const sampleAddresses = [
+            'GxB45Kq7mN9pL2Rt8Zy4Wv6Ch3Js1Xz9L',
+            'GCKFBEIYV2U22IO2BJ4KVJOIP7XPWQGQFKKWXR6DOSJBV7STMAQSMEK',
+            'GA5ZSEJYB37JRC5AVCIA5MOP4RHTM335X2KGX3IHOJAPP5RE34K4KZVN'
+        ];
+        const randomAddress = sampleAddresses[Math.floor(Math.random() * sampleAddresses.length)];
+        
+        if (elements.sendAddress) {
+            elements.sendAddress.value = randomAddress;
+            showNotification('✅ Dirección escaneada desde QR', 'success');
+            console.log('📷 QR escaneado:', randomAddress);
+        }
+    }
+
+    function processSend() {
+        const asset = assetsData.find(a => a.id === appState.sendAsset);
+        const address = elements.sendAddress?.value.trim();
+        const amount = parseFloat(elements.sendAmount?.value) || 0;
+
+        // Validaciones
+        if (!address) {
+            showNotification('❌ Por favor ingresa una dirección válida', 'error');
+            return;
+        }
+
+        if (address.length < 20) {
+            showNotification('❌ La dirección parece incorrecta', 'error');
+            return;
+        }
+
+        if (!amount || amount <= 0) {
+            showNotification('❌ Por favor ingresa un monto válido', 'error');
+            return;
+        }
+
+        if (!asset) {
+            showNotification('❌ Error al seleccionar activo', 'error');
+            return;
+        }
+
+        if (amount > asset.cryptoAmount) {
+            showNotification('❌ Saldo insuficiente', 'error');
+            return;
+        }
+
+        // Simular envío
+        showNotification(`⏳ Enviando ${amount} ${asset.name}...`, 'info');
+        
+        setTimeout(() => {
+            // Restar del balance
+            asset.cryptoAmount -= amount;
+            asset.usdValue = asset.cryptoAmount * (asset.usdValue / (asset.cryptoAmount + amount));
+
+            showNotification(`✅ ¡Envío exitoso! ${amount} ${asset.name} enviados`, 'success');
+            console.log(`💸 Enviado: ${amount} ${asset.name} a ${address.substring(0, 10)}...`);
+
+            // Actualizar UI
+            renderPortfolio();
+            updateTotalBalance();
+            closeSendView();
+        }, 1500);
+    }
+
+    // ===================================
+    // SISTEMA DE NOTIFICACIONES
+    // ===================================
+    function showNotification(message, type = 'info') {
+        const existing = document.querySelector('.notification-toast');
+        if (existing) existing.remove();
+
+        const notification = document.createElement('div');
+        notification.className = `notification-toast ${type}`;
+        notification.textContent = message;
+        
+        const colors = {
+            success: '#A8D5BA',
+            error: '#F5A5A8',
+            info: '#A5C9F5'
+        };
+
+        Object.assign(notification.style, {
+            position: 'fixed',
+            top: '80px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            backgroundColor: colors[type] || colors.info,
+            color: '#5D4E52',
+            padding: '16px 24px',
+            borderRadius: '16px',
+            boxShadow: '0 8px 24px rgba(0, 0, 0, 0.15)',
+            zIndex: '10000',
+            fontWeight: '600',
+            fontSize: '0.95rem',
+            maxWidth: '90%',
+            textAlign: 'center',
+            animation: 'slideDown 0.4s ease',
+            fontFamily: 'var(--font-secondary)'
+        });
+
+        document.body.appendChild(notification);
+
+        setTimeout(() => {
+            notification.style.animation = 'slideUp 0.4s ease';
+            setTimeout(() => notification.remove(), 400);
+        }, 3000);
     }
 
     // ===================================
