@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#F7C5D0">
+    <title>Dólaro Calamaro - Billetera Cripto</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    
+    <!-- Estilos -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Contenedor Principal de la App -->
+    <div class="app-container">
+        
+        <!-- Header Superior -->
+        <header class="app-header">
+            <div class="logo">
+                <i class="ph ph-wallet"></i>
+                <span>Dólaro Calamaro</span>
+            </div>
+            <button class="icon-button" aria-label="Configuración">
+                <i class="ph ph-gear"></i>
+            </button>
+        </header>
+
+        <!-- Contenedor de Vistas -->
+        <main class="views-container">
+            
+            <!-- VISTA: HOME -->
+            <section id="view-home" class="view active">
+                <!-- Balance Card -->
+                <div class="balance-card">
+                    <p class="balance-label">Balance Total</p>
+                    <h1 class="balance-amount">150.00 <span class="currency">USDC</span></h1>
+                    <p class="balance-fiat">≈ $150.00 USD</p>
+                </div>
+
+                <!-- Botones de Acción Rápida -->
+                <div class="quick-actions">
+                    <button class="action-button" data-view="send">
+                        <div class="action-icon send">
+                            <i class="ph-bold ph-arrow-up"></i>
+                        </div>
+                        <span>Enviar</span>
+                    </button>
+                    <button class="action-button" data-view="receive">
+                        <div class="action-icon receive">
+                            <i class="ph-bold ph-arrow-down"></i>
+                        </div>
+                        <span>Recibir</span>
+                    </button>
+                </div>
+
+                <!-- Transacciones Recientes -->
+                <div class="section-header">
+                    <h2>Actividad Reciente</h2>
+                </div>
+
+                <div class="transactions-list">
+                    <!-- Transacción 1: Envío -->
+                    <div class="transaction-item">
+                        <div class="transaction-icon outgoing">
+                            <i class="ph-fill ph-coffee"></i>
+                        </div>
+                        <div class="transaction-details">
+                            <p class="transaction-title">Café La Esquina</p>
+                            <p class="transaction-date">Hoy, 10:30 AM</p>
+                        </div>
+                        <div class="transaction-amount outgoing">
+                            <p>-5.50 USDC</p>
+                        </div>
+                    </div>
+
+                    <!-- Transacción 2: Recepción -->
+                    <div class="transaction-item">
+                        <div class="transaction-icon incoming">
+                            <i class="ph-fill ph-arrow-down"></i>
+                        </div>
+                        <div class="transaction-details">
+                            <p class="transaction-title">Recibido de María</p>
+                            <p class="transaction-date">Ayer, 3:45 PM</p>
+                        </div>
+                        <div class="transaction-amount incoming">
+                            <p>+25.00 USDC</p>
+                        </div>
+                    </div>
+
+                    <!-- Transacción 3: Envío -->
+                    <div class="transaction-item">
+                        <div class="transaction-icon outgoing">
+                            <i class="ph-fill ph-shopping-cart"></i>
+                        </div>
+                        <div class="transaction-details">
+                            <p class="transaction-title">Supermercado</p>
+                            <p class="transaction-date">Ayer, 11:20 AM</p>
+                        </div>
+                        <div class="transaction-amount outgoing">
+                            <p>-42.30 USDC</p>
+                        </div>
+                    </div>
+
+                    <!-- Transacción 4: Recepción -->
+                    <div class="transaction-item">
+                        <div class="transaction-icon incoming">
+                            <i class="ph-fill ph-arrow-down"></i>
+                        </div>
+                        <div class="transaction-details">
+                            <p class="transaction-title">Pago freelance</p>
+                            <p class="transaction-date">2 días atrás</p>
+                        </div>
+                        <div class="transaction-amount incoming">
+                            <p>+200.00 USDC</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- VISTA: ENVIAR -->
+            <section id="view-send" class="view">
+                <div class="view-header">
+                    <button class="back-button" data-view="home">
+                        <i class="ph-bold ph-arrow-left"></i>
+                    </button>
+                    <h2>Enviar USDC</h2>
+                    <div></div> <!-- Spacer para centrar título -->
+                </div>
+
+                <div class="form-container">
+                    <!-- Balance Disponible -->
+                    <div class="balance-info">
+                        <p class="info-label">Balance disponible</p>
+                        <p class="info-value">150.00 USDC</p>
+                    </div>
+
+                    <!-- Input Dirección -->
+                    <div class="input-group">
+                        <label for="recipient-address">Dirección de destino</label>
+                        <div class="input-wrapper">
+                            <input 
+                                type="text" 
+                                id="recipient-address" 
+                                placeholder="0x742d35Cc6634C0532925a3b..."
+                                autocomplete="off"
+                            >
+                            <button class="input-icon-button" aria-label="Escanear QR">
+                                <i class="ph ph-qr-code"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Input Monto -->
+                    <div class="input-group">
+                        <label for="amount">Monto a enviar</label>
+                        <div class="amount-input-wrapper">
+                            <input 
+                                type="number" 
+                                id="amount" 
+                                placeholder="0.00"
+                                step="0.01"
+                                min="0"
+                            >
+                            <span class="input-currency">USDC</span>
+                        </div>
+                        <p class="input-hint">≈ $0.00 USD</p>
+                    </div>
+
+                    <!-- Botón de Envío -->
+                    <button class="primary-button" id="send-button">
+                        <i class="ph-bold ph-paper-plane-right"></i>
+                        Confirmar Envío
+                    </button>
+                </div>
+            </section>
+
+            <!-- VISTA: RECIBIR -->
+            <section id="view-receive" class="view">
+                <div class="view-header">
+                    <button class="back-button" data-view="home">
+                        <i class="ph-bold ph-arrow-left"></i>
+                    </button>
+                    <h2>Recibir USDC</h2>
+                    <div></div> <!-- Spacer -->
+                </div>
+
+                <div class="receive-container">
+                    <p class="receive-instructions">
+                        Comparte tu código QR o dirección para recibir pagos
+                    </p>
+
+                    <!-- QR Code Simulado -->
+                    <div class="qr-code-container">
+                        <div class="qr-code-placeholder">
+                            <i class="ph-fill ph-qr-code"></i>
+                        </div>
+                    </div>
+
+                    <!-- Dirección Pública -->
+                    <div class="address-container">
+                        <p class="address-label">Tu dirección pública</p>
+                        <div class="address-box">
+                            <p class="address-text" id="public-address">GxB45Kq7mN9pL2Rt8Zy4Wv6Ch3Js1Xz9L</p>
+                            <button class="copy-button" id="copy-address-btn" aria-label="Copiar dirección">
+                                <i class="ph ph-copy"></i>
+                            </button>
+                        </div>
+                        <p class="copy-feedback" id="copy-feedback">¡Dirección copiada!</p>
+                    </div>
+
+                    <!-- Botón Compartir -->
+                    <button class="secondary-button">
+                        <i class="ph-bold ph-share-network"></i>
+                        Compartir Dirección
+                    </button>
+                </div>
+            </section>
+
+        </main>
+
+        <!-- Navegación Inferior -->
+        <nav class="bottom-nav">
+            <button class="nav-item active" data-view="home">
+                <i class="ph-fill ph-house"></i>
+                <span>Inicio</span>
+            </button>
+            <button class="nav-item" data-view="send">
+                <i class="ph-fill ph-arrow-up-right"></i>
+                <span>Enviar</span>
+            </button>
+            <button class="nav-item" data-view="receive">
+                <i class="ph-fill ph-arrow-down-left"></i>
+                <span>Recibir</span>
+            </button>
+        </nav>
+
+    </div>
+
+    <!-- JavaScript -->
+    <script src="script.js"></script>
+</body>
+</html>
