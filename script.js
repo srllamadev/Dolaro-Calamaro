@@ -19,6 +19,10 @@
     // ===================================
     // DATOS DE LOS ACTIVOS
     // ===================================
+    // ===================================
+    // DATOS DE ACTIVOS Y BALANCES
+    // ===================================
+    
     const assetsData = [
         {
             id: 'usdc',
@@ -82,6 +86,39 @@
         }
     ];
 
+    // Función para guardar balances en localStorage
+    function saveBalances() {
+        const balances = {};
+        assetsData.forEach(asset => {
+            balances[asset.id] = {
+                cryptoAmount: asset.cryptoAmount,
+                usdValue: asset.usdValue
+            };
+        });
+        localStorage.setItem('calamaro_balances', JSON.stringify(balances));
+    }
+
+    // Función para cargar balances desde localStorage
+    function loadBalances() {
+        const saved = localStorage.getItem('calamaro_balances');
+        if (saved) {
+            const balances = JSON.parse(saved);
+            assetsData.forEach(asset => {
+                if (balances[asset.id]) {
+                    asset.cryptoAmount = balances[asset.id].cryptoAmount;
+                    asset.usdValue = balances[asset.id].usdValue;
+                }
+            });
+            console.log('💾 Balances cargados desde localStorage');
+        }
+    }
+
+    // Función para resetear balances
+    function resetBalances() {
+        localStorage.removeItem('calamaro_balances');
+        location.reload();
+    }
+
     // ===================================
     // ELEMENTOS DOM
     // ===================================
@@ -142,6 +179,7 @@
         console.log('🌸 Dólaro Calamaro - Inicializando...');
         
         initElements();
+        loadBalances(); // Cargar balances guardados
         renderPortfolio();
         updateTotalBalance();
         initOfflineToggle();
@@ -155,6 +193,9 @@
         initActionButtons();
         startPriceUpdates();
         
+        // Exponer función de reset en consola
+        window.resetBalances = resetBalances;
+        console.log('💡 Tip: Usa resetBalances() en la consola para resetear los balances');
         console.log('✅ Aplicación lista');
     });
 
@@ -678,9 +719,13 @@
         showNotification(`⏳ Enviando ${amount} ${asset.name}...`, 'info');
         
         setTimeout(() => {
-            // Restar del balance
+            // Descontar del balance
             asset.cryptoAmount -= amount;
-            asset.usdValue = asset.cryptoAmount * (asset.usdValue / (asset.cryptoAmount + amount));
+            const pricePerUnit = asset.usdValue / (asset.cryptoAmount + amount);
+            asset.usdValue = asset.cryptoAmount * pricePerUnit;
+
+            // Guardar balances
+            saveBalances();
 
             showNotification(`✅ ¡Envío exitoso! ${amount} ${asset.name} enviados`, 'success');
             console.log(`💸 Enviado: ${amount} ${asset.name} a ${address.substring(0, 10)}...`);
@@ -1458,7 +1503,7 @@
         if (asset) {
             const balanceElement = document.getElementById('exchange-from-balance');
             if (balanceElement) {
-                balanceElement.textContent = `${asset.amount} ${asset.symbol}`;
+                balanceElement.textContent = `${asset.cryptoAmount.toFixed(2)} ${asset.name}`;
             }
         }
     }
@@ -1472,10 +1517,10 @@
         const toAsset = assetsData.find(a => a.id === toAssetId);
         
         if (fromAsset && toAsset && fromAmount > 0) {
-            // Calcular tasa de cambio basada en valores USD
-            const fromUsdValue = fromAsset.usdValue / fromAsset.amount;
-            const toUsdValue = toAsset.usdValue / toAsset.amount;
-            const exchangeRate = fromUsdValue / toUsdValue;
+            // Calcular tasa de cambio basada en precios del sistema de balances
+            const fromPrice = appState.balances[fromAssetId]?.price || 1;
+            const toPrice = appState.balances[toAssetId]?.price || 1;
+            const exchangeRate = fromPrice / toPrice;
             
             const toAmount = fromAmount * exchangeRate;
             
@@ -1487,15 +1532,15 @@
             const totalReceive = document.getElementById('exchange-total-receive');
             
             if (rateDisplay) {
-                rateDisplay.textContent = `1 ${fromAsset.symbol} = ${exchangeRate.toFixed(6)} ${toAsset.symbol}`;
+                rateDisplay.textContent = `1 ${fromAsset.name} = ${exchangeRate.toFixed(6)} ${toAsset.name}`;
             }
             
             if (rateDetail) {
-                rateDetail.textContent = `${exchangeRate.toFixed(6)} ${toAsset.symbol}`;
+                rateDetail.textContent = `${exchangeRate.toFixed(6)} ${toAsset.name}`;
             }
             
             if (totalReceive) {
-                totalReceive.textContent = `${toAmount.toFixed(6)} ${toAsset.symbol}`;
+                totalReceive.textContent = `${toAmount.toFixed(6)} ${toAsset.name}`;
             }
         } else {
             elements.exchangeToAmount.value = '';
@@ -1523,25 +1568,36 @@
             return;
         }
         
-        if (fromAmount > fromAsset.amount) {
+        if (fromAssetId === toAssetId) {
+            showNotification('❌ No puedes canjear el mismo activo', 'error');
+            return;
+        }
+        
+        if (fromAmount > fromAsset.cryptoAmount) {
             showNotification('❌ Fondos insuficientes', 'error');
             return;
         }
         
         const message = `¿Confirmar canje?\n\n` +
-            `Envías: ${fromAmount} ${fromAsset.symbol}\n` +
-            `Recibes: ${toAmount.toFixed(6)} ${toAsset.symbol}\n\n` +
+            `Envías: ${fromAmount} ${fromAsset.name}\n` +
+            `Recibes: ${toAmount.toFixed(6)} ${toAsset.name}\n\n` +
             `Esta acción no se puede deshacer.`;
         
         if (confirm(message)) {
-            // Simular canje
-            fromAsset.amount -= fromAmount;
-            fromAsset.usdValue = fromAsset.amount * (fromAsset.usdValue / (fromAsset.amount + fromAmount));
+            // Realizar canje
+            const fromPricePerUnit = fromAsset.usdValue / fromAsset.cryptoAmount;
             
-            toAsset.amount += toAmount;
-            toAsset.usdValue = toAsset.amount * (toAsset.usdValue / (toAsset.amount - toAmount));
+            fromAsset.cryptoAmount -= fromAmount;
+            fromAsset.usdValue = fromAsset.cryptoAmount * fromPricePerUnit;
             
-            showNotification('✅ Canje realizado con éxito', 'success');
+            const toPricePerUnit = toAsset.usdValue / toAsset.cryptoAmount;
+            toAsset.cryptoAmount += toAmount;
+            toAsset.usdValue = toAsset.cryptoAmount * toPricePerUnit;
+            
+            // Guardar balances
+            saveBalances();
+            
+            showNotification(`✅ Canjeados ${fromAmount} ${fromAsset.name} por ${toAmount.toFixed(6)} ${toAsset.name}`, 'success');
             
             // Actualizar UI
             renderPortfolio();
