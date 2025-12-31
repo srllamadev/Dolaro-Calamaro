@@ -17,7 +17,7 @@
     };
 
     // ===================================
-    // DATOS DE LOS 5 ACTIVOS
+    // DATOS DE LOS ACTIVOS
     // ===================================
     const assetsData = [
         {
@@ -27,7 +27,7 @@
             cryptoAmount: 1240.50,
             usdValue: 1240.50,
             change: 2.1,
-            icon: 'fa-dollar-sign',
+            logo: 'img/usdc.png',
             featured: true
         },
         {
@@ -37,37 +37,47 @@
             cryptoAmount: 850.75,
             usdValue: 85.08,
             change: 1.5,
-            icon: 'fa-star',
+            logo: 'img/stellar.png',
             featured: false
         },
         {
-            id: 'aqua',
-            name: 'AQUA',
-            fullName: 'Aquarius',
-            cryptoAmount: 2500.50,
-            usdValue: 125.03,
-            change: 3.2,
-            icon: 'fa-water',
+            id: 'audd',
+            name: 'AUDD',
+            fullName: 'Australian Dollar Digital',
+            cryptoAmount: 2100.30,
+            usdValue: 1380.20,
+            change: 0.8,
+            logo: 'img/audd.png',
             featured: false
         },
         {
-            id: 'ybtc',
-            name: 'yBTC',
-            fullName: 'Bitcoin anclado en Stellar',
-            cryptoAmount: 0.0025,
-            usdValue: 150.75,
-            change: -0.8,
-            icon: 'fa-bitcoin-sign',
+            id: 'gyen',
+            name: 'GYEN',
+            fullName: 'Japanese Yen Digital',
+            cryptoAmount: 185000.00,
+            usdValue: 1247.30,
+            change: -0.3,
+            logo: 'img/gyen.png',
             featured: false
         },
         {
-            id: 'yeth',
-            name: 'yETH',
-            fullName: 'Ethereum anclado en Stellar',
-            cryptoAmount: 0.12,
-            usdValue: 240.60,
-            change: 1.1,
-            icon: 'fa-ethereum',
+            id: 'eurc',
+            name: 'EURC',
+            fullName: 'Euro Coin',
+            cryptoAmount: 1150.75,
+            usdValue: 1265.83,
+            change: 1.2,
+            logo: 'img/eurc.png',
+            featured: false
+        },
+        {
+            id: 'zusd',
+            name: 'zUSD',
+            fullName: 'Zimswap USD',
+            cryptoAmount: 980.50,
+            usdValue: 980.50,
+            change: 0.1,
+            logo: 'img/zusd.png',
             featured: false
         }
     ];
@@ -203,7 +213,7 @@
 
         card.innerHTML = `
             <div class="asset-icon-large ${asset.id}">
-                <i class="fa-solid ${asset.icon}"></i>
+                <img src="${asset.logo}" alt="${asset.name}" class="asset-logo">
             </div>
             <div class="asset-info">
                 <div class="asset-name">${asset.name}</div>

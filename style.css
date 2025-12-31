@@ -597,6 +597,16 @@ input {
     font-size: 1.5rem;
     font-weight: bold;
     color: white;
+    background: var(--color-bg-main);
+    border: 2px solid rgba(247, 197, 208, 0.2);
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.asset-logo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
 .asset-icon-large.usdc {
@@ -607,16 +617,20 @@ input {
     background: linear-gradient(135deg, #14B6E7 0%, #0B8DC2 100%);
 }
 
-.asset-icon-large.aqua {
-    background: linear-gradient(135deg, #00D4FF 0%, #00A8CC 100%);
+.asset-icon-large.audd {
+    background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
 }
 
-.asset-icon-large.ybtc {
-    background: linear-gradient(135deg, #F7931A 0%, #C77515 100%);
+.asset-icon-large.gyen {
+    background: linear-gradient(135deg, #FF4655 0%, #C93644 100%);
 }
 
-.asset-icon-large.yeth {
-    background: linear-gradient(135deg, #627EEA 0%, #4E65BD 100%);
+.asset-icon-large.eurc {
+    background: linear-gradient(135deg, #003399 0%, #002277 100%);
+}
+
+.asset-icon-large.zusd {
+    background: linear-gradient(135deg, #00B894 0%, #00916E 100%);
 }
 
 .asset-info {
