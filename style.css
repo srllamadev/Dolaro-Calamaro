@@ -220,18 +220,33 @@ input {
    =================================== */
 .views-container {
     flex: 1;
+    position: relative;
+    padding: 0;
+    overflow: hidden;
+}
+
+.mode-view {
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 1;
+    background-color: var(--color-bg-main);
     padding: 0 var(--spacing-lg);
     padding-bottom: 100px;
     overflow-y: auto;
 }
 
-.mode-view {
-    display: none;
-    animation: fadeIn 0.4s ease;
-}
-
 .mode-view.active {
     display: block;
+    opacity: 1;
+    pointer-events: auto;
+    z-index: 10;
+    animation: fadeIn 0.4s ease;
 }
 
 @keyframes fadeIn {
@@ -707,11 +722,26 @@ input {
    =================================== */
 .view {
     display: none;
-    animation: fadeIn 0.4s ease;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 1;
+    background-color: var(--color-bg-main);
+    padding: 0 var(--spacing-lg);
+    padding-bottom: 100px;
+    overflow-y: auto;
 }
 
 .view.active {
     display: block;
+    opacity: 1;
+    pointer-events: auto;
+    z-index: 20;
+    animation: fadeIn 0.4s ease;
 }
 
 .view-header {

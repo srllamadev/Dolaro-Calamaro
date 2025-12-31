@@ -339,6 +339,9 @@
     function toggleOfflineMode(isOffline) {
         console.log('🔄 Cambiando a modo:', isOffline ? 'OFFLINE' : 'ONLINE');
 
+        // Actualizar estado de la aplicación
+        appState.offlineMode = isOffline;
+
         // Cambiar vistas
         if (isOffline) {
             elements.onlineMode.classList.remove('active');
@@ -744,13 +747,19 @@
                 
                 // Si es el botón offline, activar modo offline
                 if (view === 'offline') {
+                    // Cerrar todas las vistas primero
+                    closeAllViews();
+                    
                     if (!appState.offlineMode) {
                         elements.offlineToggle.checked = true;
                         toggleOfflineMode(true);
+                    } else {
+                        // Si ya está en modo offline, solo mostrar la vista
+                        elements.offlineMode.classList.add('active');
                     }
                     updateNavigation('offline');
                 } else if (view === 'home') {
-                    // Volver al inicio
+                    // Volver al inicio - desactivar modo offline si está activo
                     if (appState.offlineMode) {
                         elements.offlineToggle.checked = false;
                         toggleOfflineMode(false);
@@ -760,7 +769,7 @@
                     elements.onlineMode.classList.add('active');
                     updateNavigation(view);
                 } else if (view === 'market') {
-                    // Abrir vista de mercado
+                    // Abrir vista de mercado - desactivar modo offline si está activo
                     if (appState.offlineMode) {
                         elements.offlineToggle.checked = false;
                         toggleOfflineMode(false);
@@ -769,7 +778,7 @@
                     elements.marketView.classList.add('active');
                     updateNavigation(view);
                 } else if (view === 'settings') {
-                    // Abrir vista de ajustes
+                    // Abrir vista de ajustes - desactivar modo offline si está activo
                     if (appState.offlineMode) {
                         elements.offlineToggle.checked = false;
                         toggleOfflineMode(false);
