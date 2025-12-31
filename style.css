@@ -1451,6 +1451,379 @@ input {
 }
 
 /* ===================================
+   VISTA DE MERCADO
+   =================================== */
+.market-container {
+    padding: var(--spacing-lg);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg);
+}
+
+.market-summary {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--spacing-sm);
+}
+
+.market-stat {
+    background: var(--color-card-bg);
+    padding: var(--spacing-md);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-card);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+}
+
+.stat-label {
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+    font-weight: 500;
+}
+
+.stat-value {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--color-text-main);
+}
+
+.stat-change {
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.stat-change.positive {
+    color: var(--color-success);
+}
+
+.stat-change.negative {
+    color: var(--color-danger);
+}
+
+.chart-container {
+    background: var(--color-card-bg);
+    padding: var(--spacing-lg);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card);
+    max-height: 380px;
+    height: 380px;
+}
+
+.chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-md);
+}
+
+.chart-header h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--color-text-main);
+}
+
+.timeframe-selector {
+    display: flex;
+    gap: var(--spacing-xs);
+}
+
+.timeframe-btn {
+    padding: 6px 12px;
+    background: var(--color-bg-main);
+    border: 2px solid transparent;
+    border-radius: var(--radius-sm);
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.timeframe-btn:hover {
+    border-color: var(--color-primary);
+}
+
+.timeframe-btn.active {
+    background: var(--color-primary);
+    color: var(--color-text-main);
+    border-color: var(--color-primary);
+}
+
+#price-chart {
+    height: 250px;
+    width: 100%;
+}
+
+.refresh-button {
+    background: var(--color-card-bg);
+    border: none;
+    border-radius: var(--radius-md);
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow-card);
+}
+
+.refresh-button:hover {
+    background: var(--color-primary);
+    transform: translateY(-2px);
+}
+
+.refresh-button i {
+    font-size: 1.1rem;
+    color: var(--color-text-main);
+}
+
+.market-assets {
+    background: var(--color-card-bg);
+    padding: var(--spacing-lg);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card);
+}
+
+.market-assets h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--color-text-main);
+    margin-bottom: var(--spacing-md);
+}
+
+.market-assets-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.market-asset-item {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    padding: var(--spacing-md);
+    background: var(--color-bg-main);
+    border-radius: var(--radius-md);
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.market-asset-item:hover {
+    transform: translateX(4px);
+    background: rgba(247, 197, 208, 0.1);
+}
+
+.market-asset-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.market-asset-icon i {
+    font-size: 1.2rem;
+    color: var(--color-card-bg);
+}
+
+.market-asset-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.market-asset-name {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--color-text-main);
+}
+
+.market-asset-symbol {
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+}
+
+.market-asset-values {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 2px;
+}
+
+.market-asset-price {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--color-text-main);
+}
+
+.market-asset-change {
+    font-size: 0.75rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.market-asset-change.positive {
+    color: var(--color-success);
+}
+
+.market-asset-change.negative {
+    color: var(--color-danger);
+}
+
+/* ===================================
+   VISTA DE AJUSTES
+   =================================== */
+.settings-container {
+    padding: var(--spacing-lg);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg);
+    padding-bottom: 100px;
+}
+
+.settings-section {
+    background: var(--color-card-bg);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card);
+    overflow: hidden;
+}
+
+.settings-section-title {
+    padding: var(--spacing-md) var(--spacing-lg);
+    background: linear-gradient(135deg, rgba(247, 197, 208, 0.15) 0%, rgba(247, 197, 208, 0.05) 100%);
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--color-text-main);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.settings-section-title i {
+    color: var(--color-primary);
+    font-size: 1.1rem;
+}
+
+.settings-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--spacing-md) var(--spacing-lg);
+    border-bottom: 1px solid rgba(247, 197, 208, 0.1);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.settings-item:last-child {
+    border-bottom: none;
+}
+
+.settings-item:hover {
+    background: rgba(247, 197, 208, 0.05);
+}
+
+.settings-item-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+}
+
+.settings-item-label {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--color-text-main);
+}
+
+.settings-item-value {
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+}
+
+.settings-item i.fa-chevron-right {
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
+}
+
+.settings-toggle {
+    position: relative;
+    width: 50px;
+    height: 28px;
+    display: inline-block;
+}
+
+.settings-toggle input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.settings-toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: 0.4s;
+    border-radius: 28px;
+}
+
+.settings-toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 20px;
+    width: 20px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: 0.4s;
+    border-radius: 50%;
+}
+
+.settings-toggle input:checked + .settings-toggle-slider {
+    background-color: var(--color-primary);
+}
+
+.settings-toggle input:checked + .settings-toggle-slider:before {
+    transform: translateX(22px);
+}
+
+.logout-button {
+    background: linear-gradient(135deg, var(--color-danger) 0%, #E08A8C 100%);
+    color: white;
+    border: none;
+    padding: var(--spacing-md) var(--spacing-lg);
+    border-radius: var(--radius-md);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-sm);
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow-card);
+}
+
+.logout-button:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-hover);
+}
+
+.logout-button i {
+    font-size: 1.1rem;
+}
+
+/* ===================================
    FAB (Floating Action Button)
    =================================== */
 .fab {

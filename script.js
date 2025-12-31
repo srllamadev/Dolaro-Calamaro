@@ -90,6 +90,8 @@
         assetDropdown: null,
         sendView: null,
         receiveView: null,
+        marketView: null,
+        settingsView: null,
         sendAssetDropdown: null,
         sendAddress: null,
         sendAmount: null,
@@ -102,7 +104,8 @@
         maxButton: null,
         backButtons: null,
         copyAddressBtn: null,
-        receiveAddress: null
+        receiveAddress: null,
+        priceChart: null
     };
 
     // ===================================
@@ -120,6 +123,8 @@
         initAssetSelector();
         initSendForm();
         initReceiveForm();
+        initMarketView();
+        initSettingsView();
         startPriceUpdates();
         
         console.log('✅ Aplicación lista');
@@ -143,6 +148,8 @@
         elements.assetDropdown = document.getElementById('asset-dropdown');
         elements.sendView = document.getElementById('view-send');
         elements.receiveView = document.getElementById('view-receive');
+        elements.marketView = document.getElementById('view-market');
+        elements.settingsView = document.getElementById('view-settings');
         elements.sendAssetDropdown = document.getElementById('send-asset-dropdown');
         elements.sendAddress = document.getElementById('send-address');
         elements.sendAmount = document.getElementById('send-amount');
@@ -156,6 +163,7 @@
         elements.backButtons = document.querySelectorAll('[data-action="back-home"]');
         elements.copyAddressBtn = document.getElementById('copy-address-btn');
         elements.receiveAddress = document.getElementById('receive-address');
+        elements.priceChart = document.getElementById('price-chart');
     }
 
     // ===================================
@@ -415,19 +423,36 @@
     }
 
     function openSendView() {
+        // Cerrar otras vistas
+        if (elements.receiveView) elements.receiveView.classList.remove('active');
+        if (elements.offlineMode) elements.offlineMode.classList.remove('active');
+        
         elements.onlineMode.classList.remove('active');
         elements.sendView.classList.add('active');
         updateSendAvailableBalance();
+        
+        // Actualizar navegación para que no quede ningún botón activo
+        elements.navItems.forEach(item => item.classList.remove('active'));
+        
         console.log('📤 Abriendo vista de enviar');
     }
 
     function closeSendView() {
-        elements.sendView.classList.remove('active');
-        elements.onlineMode.classList.add('active');
-        // Limpiar formulario
-        if (elements.sendAddress) elements.sendAddress.value = '';
-        if (elements.sendAmount) elements.sendAmount.value = '';
-        console.log('🏠 Volviendo al inicio');
+        if (!elements.sendView) return;
+        if (elements.sendView.classList.contains('active')) {
+            elements.sendView.classList.remove('active');
+            if (elements.onlineMode && !appState.offlineMode) {
+                elements.onlineMode.classList.add('active');
+            }
+            // Limpiar formulario
+            if (elements.sendAddress) elements.sendAddress.value = '';
+            if (elements.sendAmount) elements.sendAmount.value = '';
+            
+            // Activar botón de inicio
+            updateNavigation('home');
+            
+            console.log('📤 Vista de enviar cerrada');
+        }
     }
 
     function updateSendAvailableBalance() {
@@ -532,15 +557,32 @@
     }
 
     function openReceiveView() {
+        // Cerrar otras vistas
+        if (elements.sendView) elements.sendView.classList.remove('active');
+        if (elements.offlineMode) elements.offlineMode.classList.remove('active');
+        
         elements.onlineMode.classList.remove('active');
         elements.receiveView.classList.add('active');
+        
+        // Actualizar navegación para que no quede ningún botón activo
+        elements.navItems.forEach(item => item.classList.remove('active'));
+        
         console.log('📥 Abriendo vista de recibir');
     }
 
     function closeReceiveView() {
-        elements.receiveView.classList.remove('active');
-        elements.onlineMode.classList.add('active');
-        console.log('🏠 Volviendo al inicio');
+        if (!elements.receiveView) return;
+        if (elements.receiveView.classList.contains('active')) {
+            elements.receiveView.classList.remove('active');
+            if (elements.onlineMode && !appState.offlineMode) {
+                elements.onlineMode.classList.add('active');
+            }
+            
+            // Activar botón de inicio
+            updateNavigation('home');
+            
+            console.log('📥 Vista de recibir cerrada');
+        }
     }
 
     function copyAddressToClipboard() {
@@ -668,12 +710,42 @@
                         elements.offlineToggle.checked = true;
                         toggleOfflineMode(true);
                     }
-                } else {
-                    // Para otros botones, si estamos en modo offline, desactivarlo
-                    if (appState.offlineMode && view !== 'offline') {
+                    updateNavigation('offline');
+                } else if (view === 'home') {
+                    // Volver al inicio
+                    if (appState.offlineMode) {
                         elements.offlineToggle.checked = false;
                         toggleOfflineMode(false);
                     }
+                    // Cerrar todas las vistas abiertas
+                    closeAllViews();
+                    elements.onlineMode.classList.add('active');
+                    updateNavigation(view);
+                } else if (view === 'market') {
+                    // Abrir vista de mercado
+                    if (appState.offlineMode) {
+                        elements.offlineToggle.checked = false;
+                        toggleOfflineMode(false);
+                    }
+                    closeAllViews();
+                    elements.marketView.classList.add('active');
+                    updateNavigation(view);
+                } else if (view === 'settings') {
+                    // Abrir vista de ajustes
+                    if (appState.offlineMode) {
+                        elements.offlineToggle.checked = false;
+                        toggleOfflineMode(false);
+                    }
+                    closeAllViews();
+                    elements.settingsView.classList.add('active');
+                    updateNavigation(view);
+                } else {
+                    // Para otros botones
+                    if (appState.offlineMode) {
+                        elements.offlineToggle.checked = false;
+                        toggleOfflineMode(false);
+                    }
+                    closeAllViews();
                     updateNavigation(view);
                 }
             });
@@ -686,6 +758,16 @@
                 alert('Funcionalidad de pago offline - Demo');
             });
         }
+    }
+
+    function closeAllViews() {
+        // Cerrar todas las vistas
+        if (elements.onlineMode) elements.onlineMode.classList.remove('active');
+        if (elements.offlineMode) elements.offlineMode.classList.remove('active');
+        if (elements.sendView) elements.sendView.classList.remove('active');
+        if (elements.receiveView) elements.receiveView.classList.remove('active');
+        if (elements.marketView) elements.marketView.classList.remove('active');
+        if (elements.settingsView) elements.settingsView.classList.remove('active');
     }
 
     function updateNavigation(activeView) {
@@ -869,6 +951,220 @@
         }
     `;
     document.head.appendChild(style);
+
+    // ===================================
+    // VISTA DE MERCADO
+    // ===================================
+    let priceChartInstance = null;
+
+    function initMarketView() {
+        renderMarketAssets();
+        initPriceChart();
+        initTimeframeButtons();
+        initRefreshButton();
+    }
+
+    function renderMarketAssets() {
+        const marketAssetsList = document.getElementById('market-assets-list');
+        if (!marketAssetsList) return;
+
+        const marketAssets = [
+            { name: 'Bitcoin', symbol: 'BTC', price: 98250.43, change: 2.5, icon: 'fa-bitcoin-sign' },
+            { name: 'Ethereum', symbol: 'ETH', price: 3621.87, change: 1.8, icon: 'fa-ethereum' },
+            { name: 'Stellar', symbol: 'XLM', price: 0.42, change: 3.2, icon: 'fa-star' },
+            { name: 'USD Coin', symbol: 'USDC', price: 1.00, change: 0.1, icon: 'fa-dollar-sign' },
+            { name: 'Cardano', symbol: 'ADA', price: 1.05, change: -1.3, icon: 'fa-coins' },
+            { name: 'Solana', symbol: 'SOL', price: 189.34, change: 4.7, icon: 'fa-sun' }
+        ];
+
+        marketAssetsList.innerHTML = marketAssets.map(asset => {
+            const changeClass = asset.change >= 0 ? 'positive' : 'negative';
+            const changeIcon = asset.change >= 0 ? 'fa-arrow-up' : 'fa-arrow-down';
+            const changeSymbol = asset.change >= 0 ? '+' : '';
+
+            return `
+                <div class="market-asset-item">
+                    <div class="market-asset-icon">
+                        <i class="fa-solid ${asset.icon}"></i>
+                    </div>
+                    <div class="market-asset-info">
+                        <span class="market-asset-name">${asset.name}</span>
+                        <span class="market-asset-symbol">${asset.symbol}</span>
+                    </div>
+                    <div class="market-asset-values">
+                        <span class="market-asset-price">$${asset.price.toLocaleString()}</span>
+                        <span class="market-asset-change ${changeClass}">
+                            <i class="fa-solid ${changeIcon}"></i>
+                            ${changeSymbol}${asset.change.toFixed(1)}%
+                        </span>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    function initPriceChart() {
+        if (!elements.priceChart) return;
+
+        const ctx = elements.priceChart.getContext('2d');
+        
+        // Generar datos simulados
+        const labels = [];
+        const data = [];
+        const basePrice = 98000;
+        
+        for (let i = 24; i >= 0; i--) {
+            labels.push(`${i}h`);
+            const variation = (Math.random() - 0.5) * 2000;
+            data.push(basePrice + variation);
+        }
+
+        priceChartInstance = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'BTC/USD',
+                    data: data,
+                    borderColor: '#F7C5D0',
+                    backgroundColor: 'rgba(247, 197, 208, 0.1)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 0,
+                    pointHoverRadius: 6,
+                    pointBackgroundColor: '#F7C5D0',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        backgroundColor: '#FFFFFF',
+                        titleColor: '#5D4E52',
+                        bodyColor: '#5D4E52',
+                        borderColor: '#F7C5D0',
+                        borderWidth: 1,
+                        padding: 12,
+                        displayColors: false,
+                        callbacks: {
+                            label: function(context) {
+                                return '$' + context.parsed.y.toLocaleString();
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        ticks: {
+                            color: '#9E8C91',
+                            callback: function(value) {
+                                return '$' + (value / 1000).toFixed(0) + 'k';
+                            }
+                        },
+                        grid: {
+                            color: 'rgba(247, 197, 208, 0.1)'
+                        }
+                    },
+                    x: {
+                        ticks: {
+                            color: '#9E8C91',
+                            maxTicksLimit: 8
+                        },
+                        grid: {
+                            display: false
+                        }
+                    }
+                },
+                interaction: {
+                    intersect: false,
+                    mode: 'index'
+                }
+            }
+        });
+    }
+
+    function initTimeframeButtons() {
+        const timeframeButtons = document.querySelectorAll('.timeframe-btn');
+        timeframeButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                timeframeButtons.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                
+                const timeframe = btn.dataset.timeframe;
+                console.log('📊 Timeframe cambiado a:', timeframe);
+                showNotification(`📊 Vista de ${timeframe} activada`, 'info');
+            });
+        });
+    }
+
+    function initRefreshButton() {
+        const refreshBtn = document.getElementById('refresh-market-btn');
+        if (refreshBtn) {
+            refreshBtn.addEventListener('click', () => {
+                refreshBtn.style.animation = 'spin 0.5s ease';
+                setTimeout(() => {
+                    refreshBtn.style.animation = '';
+                }, 500);
+                
+                renderMarketAssets();
+                showNotification('🔄 Datos actualizados', 'success');
+            });
+        }
+    }
+
+    // ===================================
+    // VISTA DE AJUSTES
+    // ===================================
+    function initSettingsView() {
+        initSettingsToggles();
+        initLogoutButton();
+    }
+
+    function initSettingsToggles() {
+        const toggles = document.querySelectorAll('.settings-toggle input[type="checkbox"]');
+        toggles.forEach(toggle => {
+            toggle.addEventListener('change', (e) => {
+                const label = e.target.closest('.settings-item').querySelector('.settings-item-label');
+                const labelText = label ? label.textContent : 'Configuración';
+                const status = e.target.checked ? 'activada' : 'desactivada';
+                
+                showNotification(`${labelText} ${status}`, 'success');
+                console.log(`⚙️ ${labelText}: ${status}`);
+            });
+        });
+    }
+
+    function initLogoutButton() {
+        const logoutBtn = document.querySelector('.logout-button');
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', () => {
+                if (confirm('¿Estás seguro que deseas cerrar sesión?')) {
+                    showNotification('👋 Cerrando sesión...', 'info');
+                    setTimeout(() => {
+                        console.log('🚪 Sesión cerrada');
+                        alert('Demo: Sesión cerrada exitosamente');
+                    }, 1000);
+                }
+            });
+        }
+    }
+
+    // Agregar animación de rotación para el botón de refresh
+    const spinStyle = document.createElement('style');
+    spinStyle.textContent = `
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+    `;
+    document.head.appendChild(spinStyle);
 
     // ===================================
     // TELEMETRÍA Y DEBUG

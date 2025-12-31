@@ -17,6 +17,9 @@
     <!-- Font Awesome 6 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js"></script>
+    
     <!-- Estilos -->
     <link rel="stylesheet" href="style.css">
 </head>
@@ -319,6 +322,227 @@
                     </div>
 
                     
+                </div>
+            </section>
+
+            <!-- ========================================
+                 VISTA: MERCADO
+                 ======================================== -->
+            <section id="view-market" class="view">
+                <div class="view-header">
+                    <h2>Mercado Cripto</h2>
+                    <button class="refresh-button" id="refresh-market-btn">
+                        <i class="fa-solid fa-arrows-rotate"></i>
+                    </button>
+                </div>
+
+                <div class="market-container">
+                    <!-- Resumen del Mercado -->
+                    <div class="market-summary">
+                        <div class="market-stat">
+                            <span class="stat-label">Cap. de Mercado</span>
+                            <span class="stat-value" id="market-cap">$2.1T</span>
+                            <span class="stat-change positive">+2.3%</span>
+                        </div>
+                        <div class="market-stat">
+                            <span class="stat-label">Vol. 24h</span>
+                            <span class="stat-value" id="market-volume">$89.4B</span>
+                            <span class="stat-change negative">-1.2%</span>
+                        </div>
+                        <div class="market-stat">
+                            <span class="stat-label">BTC Dom.</span>
+                            <span class="stat-value" id="btc-dominance">52.8%</span>
+                            <span class="stat-change positive">+0.4%</span>
+                        </div>
+                    </div>
+
+                    <!-- Gráfica Principal -->
+                    <div class="chart-container">
+                        <div class="chart-header">
+                            <h3>Precio BTC/USD</h3>
+                            <div class="timeframe-selector">
+                                <button class="timeframe-btn" data-timeframe="1H">1H</button>
+                                <button class="timeframe-btn active" data-timeframe="24H">24H</button>
+                                <button class="timeframe-btn" data-timeframe="7D">7D</button>
+                                <button class="timeframe-btn" data-timeframe="1M">1M</button>
+                            </div>
+                        </div>
+                        <canvas id="price-chart"></canvas>
+                    </div>
+
+                    <!-- Lista de Activos en el Mercado -->
+                    <div class="market-assets">
+                        <h3>Activos Populares</h3>
+                        <div class="market-assets-list" id="market-assets-list">
+                            <!-- Se llenará dinámicamente -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ========================================
+                 VISTA: AJUSTES
+                 ======================================== -->
+            <section id="view-settings" class="view">
+                <div class="view-header">
+                    <h2>Ajustes</h2>
+                    <div></div>
+                </div>
+
+                <div class="settings-container">
+                    <!-- Perfil -->
+                    <div class="settings-section">
+                        <h3 class="settings-section-title">
+                            <i class="fa-solid fa-user"></i>
+                            Perfil
+                        </h3>
+                        <div class="settings-item">
+                            <div class="settings-item-info">
+                                <span class="settings-item-label">Nombre de usuario</span>
+                                <span class="settings-item-value">@calamaro_user</span>
+                            </div>
+                            <i class="fa-solid fa-chevron-right"></i>
+                        </div>
+                        <div class="settings-item">
+                            <div class="settings-item-info">
+                                <span class="settings-item-label">Email</span>
+                                <span class="settings-item-value">user@calamaro.com</span>
+                            </div>
+                            <i class="fa-solid fa-chevron-right"></i>
+                        </div>
+                    </div>
+
+                    <!-- Seguridad -->
+                    <div class="settings-section">
+                        <h3 class="settings-section-title">
+                            <i class="fa-solid fa-shield-halved"></i>
+                            Seguridad
+                        </h3>
+                        <div class="settings-item">
+                            <div class="settings-item-info">
+                                <span class="settings-item-label">Autenticación de 2 factores</span>
+                                <span class="settings-item-value">Activada</span>
+                            </div>
+                            <label class="settings-toggle">
+                                <input type="checkbox" checked>
+                                <span class="settings-toggle-slider"></span>
+                            </label>
+                        </div>
+                        <div class="settings-item">
+                            <div class="settings-item-info">
+                                <span class="settings-item-label">Huella digital</span>
+                                <span class="settings-item-value">Configurada</span>
+                            </div>
+                            <label class="settings-toggle">
+                                <input type="checkbox" checked>
+                                <span class="settings-toggle-slider"></span>
+                            </label>
+                        </div>
+                        <div class="settings-item">
+                            <div class="settings-item-info">
+                                <span class="settings-item-label">Cambiar PIN</span>
+                            </div>
+                            <i class="fa-solid fa-chevron-right"></i>
+                        </div>
+                    </div>
+
+                    <!-- Notificaciones -->
+                    <div class="settings-section">
+                        <h3 class="settings-section-title">
+                            <i class="fa-solid fa-bell"></i>
+                            Notificaciones
+                        </h3>
+                        <div class="settings-item">
+                            <div class="settings-item-info">
+                                <span class="settings-item-label">Alertas de precio</span>
+                            </div>
+                            <label class="settings-toggle">
+                                <input type="checkbox" checked>
+                                <span class="settings-toggle-slider"></span>
+                            </label>
+                        </div>
+                        <div class="settings-item">
+                            <div class="settings-item-info">
+                                <span class="settings-item-label">Transacciones</span>
+                            </div>
+                            <label class="settings-toggle">
+                                <input type="checkbox" checked>
+                                <span class="settings-toggle-slider"></span>
+                            </label>
+                        </div>
+                        <div class="settings-item">
+                            <div class="settings-item-info">
+                                <span class="settings-item-label">Noticias del mercado</span>
+                            </div>
+                            <label class="settings-toggle">
+                                <input type="checkbox">
+                                <span class="settings-toggle-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Preferencias -->
+                    <div class="settings-section">
+                        <h3 class="settings-section-title">
+                            <i class="fa-solid fa-palette"></i>
+                            Preferencias
+                        </h3>
+                        <div class="settings-item">
+                            <div class="settings-item-info">
+                                <span class="settings-item-label">Idioma</span>
+                                <span class="settings-item-value">Español</span>
+                            </div>
+                            <i class="fa-solid fa-chevron-right"></i>
+                        </div>
+                        <div class="settings-item">
+                            <div class="settings-item-info">
+                                <span class="settings-item-label">Moneda</span>
+                                <span class="settings-item-value">USD</span>
+                            </div>
+                            <i class="fa-solid fa-chevron-right"></i>
+                        </div>
+                        <div class="settings-item">
+                            <div class="settings-item-info">
+                                <span class="settings-item-label">Tema oscuro</span>
+                            </div>
+                            <label class="settings-toggle">
+                                <input type="checkbox">
+                                <span class="settings-toggle-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Acerca de -->
+                    <div class="settings-section">
+                        <h3 class="settings-section-title">
+                            <i class="fa-solid fa-info-circle"></i>
+                            Acerca de
+                        </h3>
+                        <div class="settings-item">
+                            <div class="settings-item-info">
+                                <span class="settings-item-label">Versión</span>
+                                <span class="settings-item-value">1.0.0</span>
+                            </div>
+                        </div>
+                        <div class="settings-item">
+                            <div class="settings-item-info">
+                                <span class="settings-item-label">Términos y condiciones</span>
+                            </div>
+                            <i class="fa-solid fa-chevron-right"></i>
+                        </div>
+                        <div class="settings-item">
+                            <div class="settings-item-info">
+                                <span class="settings-item-label">Política de privacidad</span>
+                            </div>
+                            <i class="fa-solid fa-chevron-right"></i>
+                        </div>
+                    </div>
+
+                    <!-- Cerrar sesión -->
+                    <button class="logout-button">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                        Cerrar Sesión
+                    </button>
                 </div>
             </section>
 
