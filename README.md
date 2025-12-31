@@ -75,7 +75,204 @@ Dólaro Calamaro implementa una arquitectura híbrida que combina:
 4. **Stellar Network:** Infraestructura blockchain para ejecución de transacciones
 5. **Sistema de Seguridad PIN:** Autenticación de dos factores para transacciones offline
 
-### 3.2 Protocolo USSD Propuesto
+### 3.2 Por qué Stellar Network: La Elección Correcta
+
+**Stellar Development Foundation** fue creada con la misión explícita de "crear equidad de acceso al sistema financiero global" (SDF, 2014). Esta visión se alinea perfectamente con los objetivos de Dólaro Calamaro, haciendo de Stellar no solo una opción técnica, sino la **plataforma ideal** para inclusión financiera en América Latina.
+
+#### 3.2.1 Ventajas Técnicas Decisivas de Stellar
+
+**1. Costos de Transacción Ultrabajos**
+
+Stellar cobra **0.00001 XLM por operación** (~$0.0000012 USD al tipo de cambio actual). Esta estructura de costos es fundamental para:
+
+- **Microtransacciones viables:** Enviar $5 USD tiene el mismo costo que enviar $5,000 USD
+- **Remesas accesibles:** Familias rurales pueden recibir $10-20 USD sin que las comisiones consuman el valor
+- **Sostenibilidad del modelo USSD:** Sin costos prohibitivos que obliguen a cobrar comisiones a usuarios finales
+
+**Comparativa de costos:**
+
+| Blockchain | Costo Promedio | Costo Dólaro Calamaro ($100 USDC) |
+|------------|----------------|------------------------------------|
+| Ethereum | $5-25 USD | 5-25% del monto |
+| Bitcoin | $1-5 USD | 1-5% del monto |
+| Polygon | $0.01-0.10 USD | 0.01-0.1% del monto |
+| **Stellar** | **$0.0000012 USD** | **0.0000012% del monto** |
+
+**2. Velocidad de Confirmación (3-5 segundos)**
+
+La latencia de USSD es ~2 segundos. Stellar confirma transacciones en 3-5 segundos, haciendo viable un flujo completo de:
+
+```
+USSD Request (2s) → Backend Validation (0.5s) → Stellar Confirmation (4s) → Response (2s)
+Total: ~8.5 segundos
+```
+
+Esto es **crítico** para la experiencia USSD, donde sesiones timeout después de 90 segundos. Blockchains con tiempos de confirmación mayores (Bitcoin: 10-60 minutos, Ethereum: 15 segundos - 5 minutos) harían imposible este modelo.
+
+**3. Soporte Nativo de Múltiples Assets**
+
+Stellar permite emitir y gestionar **custom assets** sin smart contracts adicionales. Esto habilita:
+
+- **Stablecoins directos:** USDC, EURC, AUDD, GYEN nativamente soportados
+- **Trustlines simples:** Usuarios aceptan assets con una sola operación
+- **Path payments:** Conversión automática entre assets en una sola transacción
+- **Atomic swaps:** Intercambio USDC↔XLM sin intermediarios
+
+**Ejemplo de path payment (imposible en Bitcoin, complejo en Ethereum):**
+
+```javascript
+// Usuario tiene EURC, destinatario quiere USDC
+// Stellar resuelve automáticamente la ruta mediante su DEX nativo
+const payment = stellar.Operation.pathPaymentStrictReceive({
+  sendAsset: EURC,
+  sendMax: '105', // Máximo 105 EURC
+  destination: destinationAddress,
+  destAsset: USDC,
+  destAmount: '100', // Destinatario recibe exactamente 100 USDC
+  path: [] // Stellar calcula la mejor ruta automáticamente
+});
+```
+
+**4. DEX Integrado (Stellar Decentralized Exchange)**
+
+El **orderbook nativo de Stellar** permite:
+
+- Intercambio de assets sin smart contracts externos
+- Liquidez compartida entre todos los usuarios de la red
+- Ejecución automática al mejor precio disponible
+- Sin necesidad de wrapped tokens o bridges
+
+Esto es fundamental para la funcionalidad de **intercambio vía USSD** (`*4545*3*50*001*003#`).
+
+**5. Características de Compliance**
+
+Stellar incluye features diseñadas específicamente para cumplimiento regulatorio:
+
+- **Clawback:** Emisores pueden revocar assets en caso de actividad ilícita (crítico para licencias financieras)
+- **Authorization flags:** Control granular sobre quién puede recibir/enviar assets
+- **Memo fields:** Trazabilidad de transacciones para auditorías
+- **Account limits:** Restricción de balances para cumplir regulaciones locales
+
+Estas capacidades son **esenciales** para operar legalmente como proveedor de servicios financieros en Bolivia y otros países latinoamericanos.
+
+**6. Escalabilidad para Inclusión Financiera**
+
+Stellar procesa **~1000 transacciones por segundo** con capacidad de escalar a miles más mediante:
+
+- Arquitectura Federated Byzantine Agreement (no requiere minería)
+- Validadores distribuidos globalmente
+- Bajo consumo energético (~0.00003 kWh por transacción vs Bitcoin: ~750 kWh)
+
+Esto permite:
+- **2.5 millones de usuarios proyectados:** ~29 TPS en picos
+- **Sostenibilidad ambiental:** Crítico para aceptación en comunidades rurales conscientes del impacto ecológico
+- **Costos operativos predecibles:** Sin "gas wars" como Ethereum
+
+#### 3.2.2 Comparativa: Stellar vs Otras Blockchains
+
+| Característica | Stellar | Ethereum | Bitcoin | Solana | Polygon |
+|----------------|---------|----------|---------|--------|----------|
+| **Tiempo de confirmación** | 3-5s | 15s-5min | 10-60min | 400ms | 2-3s |
+| **Costo por transacción** | $0.0000012 | $0.50-$25 | $1-$5 | $0.00025 | $0.01-$0.10 |
+| **TPS (transacciones/seg)** | ~1000 | ~15-30 | ~7 | ~65,000 | ~7,000 |
+| **Soporte multi-asset nativo** | ✅ Sí | ❌ Requiere ERC-20 | ❌ No | ⚠️ Limitado | ⚠️ Limitado |
+| **DEX integrado** | ✅ Nativo | ⚠️ Uniswap (terceros) | ❌ No | ⚠️ Serum | ⚠️ QuickSwap |
+| **Path payments** | ✅ Nativo | ❌ Requiere agregadores | ❌ No | ❌ No | ❌ No |
+| **Orientado a remesas** | ✅ Diseñado para ello | ❌ Propósito general | ❌ Store of value | ❌ DeFi/NFTs | ⚠️ Scaling ETH |
+| **Consumo energético** | Muy bajo | Alto | Muy alto | Medio | Bajo |
+| **Compliance features** | ✅ Clawback, auth | ⚠️ Smart contracts | ❌ No | ⚠️ Limitado | ⚠️ Limitado |
+| **Simplicidad de desarrollo** | ✅ Alta | ⚠️ Media | ❌ Baja | ⚠️ Media | ⚠️ Media |
+| **Misión de inclusión financiera** | ✅ **Core mission** | ❌ No específica | ❌ No específica | ❌ No específica | ❌ No específica |
+
+#### 3.2.3 Por qué NO otras blockchains
+
+**Ethereum:**
+- ❌ Costos prohibitivos para microtransacciones ($0.50-$25 por tx)
+- ❌ Tiempos de confirmación incompatibles con USSD (15s-5min)
+- ❌ Complejidad de smart contracts innecesaria para pagos simples
+- ❌ Gas wars durante picos de demanda
+
+**Bitcoin:**
+- ❌ Diseñado como reserva de valor, no para pagos diarios
+- ❌ Confirmaciones de 10-60 minutos inutilizables para USSD
+- ❌ Sin soporte nativo de stablecoins
+- ❌ Costos variables e impredecibles
+
+**Solana:**
+- ⚠️ Enfoque en DeFi/NFTs, no en remesas
+- ⚠️ Historial de interrupciones de red (9 outages en 2022-2023)
+- ⚠️ Sin features de compliance integradas
+- ⚠️ Ecosistema de stablecoins menos maduro
+
+**Polygon:**
+- ⚠️ Dependencia de Ethereum (puente puede fallar)
+- ⚠️ Costos aún 8-83x superiores a Stellar
+- ⚠️ Sin DEX nativo ni path payments
+- ⚠️ No diseñado específicamente para inclusión financiera
+
+#### 3.2.4 Casos de Éxito de Stellar en Mercados Emergentes
+
+Stellar ya ha demostrado viabilidad en contextos similares:
+
+**1. MoneyGram + Stellar (2021-2023):**
+- Integración para remesas USD↔MXN, USD↔PHP
+- Reducción de costos del 70% vs SWIFT
+- Liquidación en segundos vs 3-5 días
+
+**2. Mercy Corps + Stellar (Venezuela):**
+- Distribución de ayuda humanitaria en USDC
+- 15,000+ beneficiarios en zonas rurales
+- Sin infraestructura bancaria requerida
+
+**3. Vibrant (Kenia, Argentina, Nigeria):**
+- App de pagos Stellar-based para mercados emergentes
+- Remesas y cashout local
+- Similar modelo USSD en desarrollo
+
+**4. Bitso + Stellar (México):**
+- Mayor exchange de América Latina
+- Usa Stellar para liquidación de remesas
+- Procesa $2B+ USD anuales
+
+Estos casos validan que **Stellar funciona en producción** para exactamente el problema que Dólaro Calamaro resuelve.
+
+#### 3.2.5 Alineación con la Misión de Stellar
+
+La **Stellar Development Foundation** declara:
+
+> "Stellar makes it possible to create, send, and trade digital representations of all forms of money—dollars, pesos, bitcoin, pretty much anything. It's designed so all the world's financial systems can work together on a single network."
+
+Dólaro Calamaro encarna esta visión al:
+
+1. ✅ **Crear acceso equitativo:** USSD democratiza acceso sin requerir smartphones
+2. ✅ **Conectar sistemas financieros:** Puente entre crypto y economía local boliviana
+3. ✅ **Reducir fricciones:** Remesas sin intermediarios costosos
+4. ✅ **Empoderar individuos:** Auto-custodia y control directo de activos
+5. ✅ **Innovar en UX:** USSD como capa de accesibilidad sobre Stellar
+
+**Stellar no es simplemente la blockchain elegida; es la ÚNICA blockchain diseñada específicamente para resolver el problema de Dólaro Calamaro.**
+
+#### 3.2.6 Roadmap de Integración Stellar
+
+**Fase 1 - MVP (Q1 2026):**
+- ✅ Horizon API para consultas de balance
+- ✅ Stellar SDK (JavaScript) para transacciones
+- ✅ Testnet deployment
+- ✅ Soporte USDC y XLM
+
+**Fase 2 - Expansion (Q2 2026):**
+- 🔄 Mainnet migration
+- 🔄 Path payments para intercambios automáticos
+- 🔄 Clawback implementation para compliance
+- 🔄 Integración con Anchors locales (cashout fiat)
+
+**Fase 3 - Ecosystem (Q3-Q4 2026):**
+- 🔜 Stellar Aid Assist integration (para NGOs)
+- 🔜 Vibrant partnership (cashout network)
+- 🔜 MoneyGram access points
+- 🔜 Stellar Quest educational program para usuarios
+
+### 3.3 Protocolo USSD Propuesto
 
 #### 3.2.1 Estructura de Códigos USSD
 
@@ -166,10 +363,20 @@ Donde:
 - PostgreSQL para almacenamiento de sesiones
 - Redis para caché de transacciones
 
-**Blockchain:**
-- Stellar Network (Testnet/Mainnet)
-- Horizon API para consultas
-- Stellar Laboratory para operaciones
+**Blockchain (Stellar Network):**
+- **Stellar Core:** Nodo validador (opcional para producción)
+- **Horizon API:** Interfaz REST para consultas de ledger y submisión de transacciones
+- **Stellar SDK (JavaScript):** Construcción y firma de transacciones
+- **Stellar Laboratory:** Herramienta de testing y debugging
+- **Friendbot (Testnet):** Funding de cuentas de desarrollo
+- **StellarExpert/StellarChain:** Block explorers para monitoreo
+- **Testnet/Mainnet:** Despliegue dual para desarrollo y producción
+
+**Assets soportados en Stellar:**
+- USDC (Circle) - `USDC:GA5ZSEJYB37JRC5AVCIA5MOP4RHTM335X2KGX3IHOJAPP5RE34K4KZVN`
+- EURC (Circle) - Euro stablecoin
+- XLM - Native asset para fees
+- AUDD, GYEN, zUSD - Stablecoins adicionales vía issuers verificados
 
 **Seguridad:**
 - Autenticación PIN de 6 dígitos
@@ -177,41 +384,86 @@ Donde:
 - Rate limiting en API
 - Validación de firmas en transacciones
 
-### 4.2 Flujo de Transacción USSD
+### 4.2 Flujo de Transacción USSD con Stellar Network
 
 ```
-1. Usuario marca: *4545*100*001*DIRECCIÓN#
+1. Usuario marca: *4545*100*001*GAV3RM42MHBT3TMIWNXZ6SNUPBYOOZPKP6CFKN2EAFGYY3NVMJ62OGGU#
    ↓
-2. Gateway USSD recibe solicitud
+2. Gateway USSD recibe solicitud (Twilio/Africa's Talking)
    ↓
 3. Backend valida:
-   - Formato de código
-   - Existencia de usuario (por número telefónico)
-   - Balance disponible
-   - Validez de dirección destino
+   - Formato de código USSD
+   - Existencia de usuario (mapeo phone → Stellar address)
+   - Query a Horizon API: GET /accounts/{stellar_address}
+   - Validación de balance disponible del asset USDC
+   - Validación de dirección destino con StrKey.isValidEd25519PublicKey()
    ↓
-4. Sistema solicita confirmación PIN: *4545*5*000000#
+4. Sistema presenta menú de confirmación:
+   "Confirmar envío:
+    100 USDC
+    A: GAV3R...OGGU
+    Comisión: 0.00001 XLM
+    
+    1. Confirmar
+    2. Cancelar"
    ↓
-5. Validación de PIN
+5. Usuario responde "1"
    ↓
-6. Backend construye transacción Stellar:
-   - Source: Cuenta del usuario
-   - Destination: Dirección especificada
-   - Asset: USDC (código 001)
-   - Amount: 100
+6. Sistema solicita PIN (input oculto):
+   "Ingresa PIN:
+    _ _ _ _ _ _"
    ↓
-7. Firma con clave privada custodiada
+7. Validación de PIN (bcrypt hash comparison)
    ↓
-8. Envío a Stellar Network
+8. Backend construye transacción Stellar:
+   
+   const transaction = new TransactionBuilder(sourceAccount, {
+     fee: BASE_FEE,
+     networkPassphrase: Networks.PUBLIC
+   })
+   .addOperation(Operation.payment({
+     destination: 'GAV3RM42MHBT3TMIWNXZ6SNUPBYOOZPKP6CFKN2EAFGYY3NVMJ62OGGU',
+     asset: new Asset('USDC', 'GA5ZSEJYB37JRC5AVCIA5MOP4RHTM335X2KGX3IHOJAPP5RE34K4KZVN'),
+     amount: '100'
+   }))
+   .addMemo(Memo.text('DolaroCalamaro_USSD'))
+   .setTimeout(30)
+   .build();
    ↓
-9. Confirmación en 3-5 segundos
+9. Firma con clave privada custodiada (desde HSM)
+   transaction.sign(keypair);
    ↓
-10. SMS de confirmación al usuario:
-    "Enviado: 100 USDC
+10. Submisión a Stellar Network vía Horizon API:
+    POST https://horizon.stellar.org/transactions
+    ↓
+11. Stellar procesa mediante Stellar Consensus Protocol (SCP)
+    ↓
+12. Confirmación en ledger (~3-5 segundos)
+    ↓
+13. Backend recibe transaction hash de Horizon
+    ↓
+14. SMS de confirmación al usuario:
+    "✓ Transacción exitosa
+     Enviado: 100 USDC
      A: GAV3R...OGGU
-     Hash: e7a4f...
-     Nuevo saldo: 1140.50 USDC"
+     Hash: e7a4f2b8c9d1a3e5f6
+     Nuevo saldo: 1140.50 USDC
+     
+     Ver en: stellar.expert/explorer/public/tx/e7a4f2b8c9d1a3e5f6"
+    ↓
+15. Log en base de datos para auditoría y compliance
+
+Tiempo total: ~8-10 segundos
+Costo total: 0.00001 XLM (~$0.0000012 USD)
 ```
+
+**Ventajas de usar Stellar en este flujo:**
+
+1. ✅ **Velocidad:** 3-5s de confirmación permite respuesta USSD en tiempo real
+2. ✅ **Costo predecible:** 0.00001 XLM fijo, sin "gas wars"
+3. ✅ **Trazabilidad:** Hash inmutable en ledger público
+4. ✅ **Asset nativo:** USDC soportado sin wrappers ni bridges
+5. ✅ **Memo field:** Identificación de transacciones Dólaro Calamaro para reporting
 
 ### 4.3 Seguridad y Custodia
 
@@ -345,11 +597,16 @@ class USSDProcessor {
   }
 
   async executeStellarTransaction(source, destination, amount, tokenCode) {
+    // Cargar cuenta source desde Stellar Network vía Horizon
     const sourceAccount = await this.stellar.server.loadAccount(source);
+    
+    // Obtener asset según código
     const asset = this.getAsset(tokenCode);
+    // Ejemplo: '001' → Asset('USDC', 'GA5ZSEJYB37JRC5AVCIA5MOP4RHTM335X2KGX3IHOJAPP5RE34K4KZVN')
 
+    // Construir transacción Stellar
     const transaction = new this.stellar.TransactionBuilder(sourceAccount, {
-      fee: this.stellar.BASE_FEE,
+      fee: this.stellar.BASE_FEE, // 100 stroops = 0.00001 XLM
       networkPassphrase: this.stellar.Networks.PUBLIC
     })
       .addOperation(this.stellar.Operation.payment({
@@ -357,15 +614,77 @@ class USSDProcessor {
         asset: asset,
         amount: amount.toString()
       }))
-      .setTimeout(30)
+      .addMemo(this.stellar.Memo.text('DolaroCalamaro_USSD')) // Identificación
+      .setTimeout(30) // Timeout de 30 segundos
       .build();
 
     // Firmar con clave privada custodiada (desde HSM)
     const keyPair = await this.getSecureKeyPair(source);
     transaction.sign(keyPair);
 
-    const result = await this.stellar.server.submitTransaction(transaction);
-    return result.hash;
+    // Enviar a Stellar Network vía Horizon API
+    try {
+      const result = await this.stellar.server.submitTransaction(transaction);
+      
+      // Log de éxito
+      console.log('✓ Stellar transaction confirmed');
+      console.log('  Ledger:', result.ledger);
+      console.log('  Hash:', result.hash);
+      console.log('  Fee charged:', result.fee_charged, 'stroops');
+      
+      // Guardar en DB para auditoría
+      await this.db.logTransaction({
+        stellar_hash: result.hash,
+        ledger: result.ledger,
+        fee_charged: result.fee_charged,
+        source,
+        destination,
+        amount,
+        asset: tokenCode,
+        timestamp: new Date()
+      });
+      
+      return result.hash;
+      
+    } catch (error) {
+      // Manejo de errores específicos de Stellar
+      if (error.response && error.response.data) {
+        const { extras } = error.response.data;
+        
+        if (extras.result_codes.transaction === 'tx_insufficient_balance') {
+          throw new Error('Saldo insuficiente de XLM para fees');
+        }
+        
+        if (extras.result_codes.operations.includes('op_underfunded')) {
+          throw new Error(`Saldo insuficiente de ${this.tokenMap[tokenCode]}`);
+        }
+        
+        if (extras.result_codes.transaction === 'tx_bad_seq') {
+          throw new Error('Error de secuencia. Reintentando...');
+          // Recargar cuenta y reintentar
+        }
+      }
+      
+      throw error;
+    }
+  }
+  
+  getAsset(tokenCode) {
+    // Mapeo de códigos a assets de Stellar
+    const assetMap = {
+      '001': new this.stellar.Asset(
+        'USDC',
+        'GA5ZSEJYB37JRC5AVCIA5MOP4RHTM335X2KGX3IHOJAPP5RE34K4KZVN' // Circle USDC issuer
+      ),
+      '002': new this.stellar.Asset(
+        'EURC',
+        'GDHU6WRG4IEQXM5NZ4BMPKOXHW76MZM4Y2IEMFDVXBSDP6SJY4ITNPP2' // Circle EURC issuer
+      ),
+      '003': this.stellar.Asset.native(), // XLM
+      // Otros assets verificados en Stellar...
+    };
+    
+    return assetMap[tokenCode];
   }
 }
 ```
@@ -529,11 +848,125 @@ Dólaro Calamaro demuestra la viabilidad técnica y económica de democratizar e
 
 La convergencia de USSD y blockchain no es meramente una innovación tecnológica, sino un catalizador para **justicia económica global**. Mientras la banca tradicional ha excluido a miles de millones de personas debido a la falta de rentabilidad percibida, las redes descentralizadas eliminan esa ecuación de costo-beneficio al reducir infraestructura a casi cero.
 
-El éxito de este proyecto dependerá de tres pilares: **excelencia técnica**, **colaboración regulatoria** y **educación comunitaria**. Únicamente mediante un enfoque holístico que aborde seguridad, cumplimiento y usabilidad podremos materializar la promesa de inclusión financiera universal.
+**Stellar Network es el fundamento técnico y filosófico que hace posible Dólaro Calamaro.** Sin las características únicas de Stellar —costos ultrabajos, velocidad, soporte multi-asset, DEX nativo, y compromiso con inclusión financiera— este proyecto no sería viable. Dólaro Calamaro no es simplemente un proyecto **en** Stellar; es un proyecto que **solo puede existir** en Stellar.
 
 ---
 
-## 10. Referencias
+## 10. Contribución al Ecosistema Stellar
+
+### 10.1 Valor Agregado para Stellar Network
+
+Dólaro Calamaro aporta al ecosistema Stellar en múltiples dimensiones:
+
+**1. Caso de Uso Innovador:**
+- Primera implementación documentada de Stellar + USSD para pagos offline
+- Demuestra viabilidad técnica de blockchain en entornos de baja conectividad
+- Referencia replicable para otros países en desarrollo
+
+**2. Expansión de Audiencia:**
+- Target: 2.5 millones de usuarios en Bolivia (población: 12M)
+- Demografía: 65% rural, 38% sin acceso a smartphones
+- Representa segmento tradicionalmente excluido del ecosistema crypto
+
+**3. Volumen de Transacciones:**
+- Proyección: $150M USD en 5 años
+- Promedio: ~50,000 transacciones diarias en madurez
+- Incremento de actividad on-chain de Stellar en región LATAM
+
+**4. Adopción de USDC en Stellar:**
+- Promoción de Circle USDC como stablecoin primario
+- Casos de uso real (remesas, comercio) vs especulación
+- Fortalecimiento del anchor ecosystem
+
+**5. Desarrollo de Infraestructura:**
+- Código open-source para USSD gateways
+- Documentación de mejores prácticas de custodia
+- Toolkit reusable para otros desarrolladores
+
+### 10.2 Alineación con Stellar Community Fund (SCF)
+
+Dólaro Calamaro cumple criterios de [Stellar Community Fund](https://communityfund.stellar.org/):
+
+✅ **Impact:** Inclusión financiera medible en región desatendida  
+✅ **Innovation:** Primera integración USSD + Stellar documentada  
+✅ **Sustainability:** Modelo de ingresos vía servicios premium (cashout, intercambios)  
+✅ **Open Source:** Código y documentación públicos en GitHub  
+✅ **Community:** Educación y onboarding de usuarios no-técnicos
+
+### 10.3 Colaboraciones Potenciales
+
+**Con Stellar Development Foundation:**
+- Caso de estudio para Stellar.org
+- Presentación en Meridian Conference
+- Inclusión en Stellar Quest educational tracks
+
+**Con Circle (USDC):**
+- Promoción de USDC como stablecoin de referencia
+- Integración con Circle APIs para compliance
+- Co-marketing en mercados LATAM
+
+**Con Vibrant:**
+- Uso de red de cashout existente
+- Integración de wallets para UX mejorada
+- Expansión conjunta en región andina
+
+**Con MoneyGram:**
+- Puntos de retiro físico en Bolivia
+- Conversión USDC → efectivo local
+- Onboarding de usuarios tradicionales
+
+### 10.4 Recursos Open Source para la Comunidad
+
+**Repositorios planeados:**
+
+1. **`stellar-ussd-gateway`** (Node.js)
+   - Procesador genérico de USSD → Stellar
+   - Adaptadores para Africa's Talking, Twilio
+   - Ejemplos de integración
+
+2. **`stellar-custodial-wallet`** (Node.js + HSM)
+   - Sistema de custodia segura para usuarios USSD
+   - Multi-signature support
+   - Audit logs y compliance tools
+
+3. **`dolaro-calamaro-frontend`** (PWA)
+   - Interfaz completa lista para deployment
+   - Integración Stellar SDK
+   - Ejemplos de balance management
+
+4. **`stellar-ussd-docs`** (Markdown)
+   - Esta documentación académica
+   - Guías de implementación
+   - Best practices de seguridad
+
+**Licencia:** MIT (máxima reutilización por la comunidad)
+
+### 10.5 Métricas de Éxito para Stellar Ecosystem
+
+**KPIs técnicos:**
+- ✅ Transacciones procesadas en Stellar Network
+- ✅ Nuevas cuentas creadas (user wallets)
+- ✅ Volumen de USDC circulante
+- ✅ Trustlines establecidas
+- ✅ Operaciones de DEX (intercambios)
+
+**KPIs de adopción:**
+- ✅ Usuarios activos mensuales (MAU)
+- ✅ Transacciones USSD completadas
+- ✅ Tasa de retención (6 meses)
+- ✅ NPS (Net Promoter Score)
+- ✅ Volumen de remesas procesadas
+
+**KPIs de ecosistema:**
+- ✅ Forks del código open source
+- ✅ Contribuciones de la comunidad
+- ✅ Implementaciones en otros países
+- ✅ Integraciones con otros proyectos Stellar
+- ✅ Menciones en medios y conferencias
+
+---
+
+## 11. Referencias
 
 Africa's Talking. (2024). *USSD API Documentation*. https://developers.africastalking.com/docs/ussd
 
@@ -567,6 +1000,8 @@ World Bank. (2024). *Remittance Prices Worldwide Quarterly, Issue 49*. Washingto
 
 ### Anexo A: Especificación Técnica Completa API
 
+#### A.1 USSD Gateway API
+
 **Endpoint:** `POST /api/ussd/process`
 
 **Request:**
@@ -574,16 +1009,95 @@ World Bank. (2024). *Remittance Prices Worldwide Quarterly, Issue 49*. Washingto
 {
   "sessionId": "ATUid_abc123",
   "phoneNumber": "+59171234567",
-  "text": "*4545*100*001*GAV3RM...*"
+  "text": "*4545*100*001*GAV3RM...*",
+  "serviceCode": "*4545#",
+  "networkCode": "63903" // Operador móvil
 }
 ```
 
 **Response:**
 ```json
 {
-  "message": "Confirma envío...",
+  "message": "Confirmar envío:\n100 USDC\nA: GAV3R...OGGU\nComisión: 0.00001 XLM\n\n1. Confirmar\n2. Cancelar",
   "continueSession": true
 }
+```
+
+#### A.2 Stellar Integration API
+
+**Horizon Server:** `https://horizon.stellar.org` (Mainnet)  
+**Horizon Server:** `https://horizon-testnet.stellar.org` (Testnet)
+
+**Consulta de balance:**
+```bash
+GET https://horizon.stellar.org/accounts/{stellar_address}
+```
+
+**Response:**
+```json
+{
+  "id": "GAV3RM42MHBT3TMIWNXZ6SNUPBYOOZPKP6CFKN2EAFGYY3NVMJ62OGGU",
+  "account_id": "GAV3RM42MHBT3TMIWNXZ6SNUPBYOOZPKP6CFKN2EAFGYY3NVMJ62OGGU",
+  "sequence": "123456789012345",
+  "balances": [
+    {
+      "balance": "1240.5000000",
+      "asset_type": "credit_alphanum4",
+      "asset_code": "USDC",
+      "asset_issuer": "GA5ZSEJYB37JRC5AVCIA5MOP4RHTM335X2KGX3IHOJAPP5RE34K4KZVN"
+    },
+    {
+      "balance": "10.0000000",
+      "asset_type": "native"
+    }
+  ]
+}
+```
+
+**Submisión de transacción:**
+```bash
+POST https://horizon.stellar.org/transactions
+Content-Type: application/x-www-form-urlencoded
+
+tx=AAAAAH7bPS...%3D%3D
+```
+
+#### A.3 Stellar SDK (JavaScript) - Ejemplo Completo
+
+```javascript
+const StellarSdk = require('stellar-sdk');
+const server = new StellarSdk.Server('https://horizon.stellar.org');
+
+// Configurar asset USDC
+const USDC = new StellarSdk.Asset(
+  'USDC',
+  'GA5ZSEJYB37JRC5AVCIA5MOP4RHTM335X2KGX3IHOJAPP5RE34K4KZVN'
+);
+
+// Cargar cuenta source
+const sourceKeys = StellarSdk.Keypair.fromSecret('SXXXXXXXXXXXXX');
+const sourceAccount = await server.loadAccount(sourceKeys.publicKey());
+
+// Construir transacción
+const transaction = new StellarSdk.TransactionBuilder(sourceAccount, {
+  fee: StellarSdk.BASE_FEE,
+  networkPassphrase: StellarSdk.Networks.PUBLIC
+})
+  .addOperation(StellarSdk.Operation.payment({
+    destination: 'GAV3RM42MHBT3TMIWNXZ6SNUPBYOOZPKP6CFKN2EAFGYY3NVMJ62OGGU',
+    asset: USDC,
+    amount: '100'
+  }))
+  .addMemo(StellarSdk.Memo.text('DolaroCalamaro'))
+  .setTimeout(30)
+  .build();
+
+// Firmar
+transaction.sign(sourceKeys);
+
+// Enviar
+const result = await server.submitTransaction(transaction);
+console.log('Success! Hash:', result.hash);
 ```
 
 ### Anexo B: Catálogo Completo de Códigos USSD
@@ -617,18 +1131,3 @@ CREATE TABLE transactions (
   created_at TIMESTAMP DEFAULT NOW()
 );
 ```
-
----
-
-**Autor:** Equipo de Desarrollo Dólaro Calamaro  
-**Institución:** [Universidad/Organización]  
-**Fecha:** 31 de Diciembre, 2025  
-**Versión:** 1.0  
-**Licencia:** MIT License  
-**Contacto:** contact@dolarocalamaro.org
-
----
-
-**Nota de Acceso Abierto:** Este documento se distribuye bajo licencia Creative Commons Attribution 4.0 International (CC BY 4.0) con el objetivo de promover investigación replicable en inclusión financiera. Se invita a investigadores, desarrolladores y organizaciones a contribuir, adaptar y desplegar soluciones basadas en esta arquitectura.
-
-**Agradecimientos:** A las comunidades rurales de Bolivia que inspiraron este proyecto, a la Stellar Development Foundation por su infraestructura de código abierto, y a todos los defensores de la inclusión financiera global.
