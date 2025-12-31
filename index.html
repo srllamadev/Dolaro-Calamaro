@@ -70,7 +70,7 @@
                             </div>
                             <span>Enviar</span>
                         </button>
-                        <button class="action-button">
+                        <button class="action-button" id="open-receive-btn">
                             <div class="action-icon receive">
                                 <i class="fa-solid fa-qrcode"></i>
                             </div>
@@ -274,6 +274,51 @@
                         <i class="fa-solid fa-paper-plane"></i>
                         Confirmar Envío
                     </button>
+                </div>
+            </section>
+
+            <!-- ========================================
+                 VISTA: RECIBIR
+                 ======================================== -->
+            <section id="view-receive" class="view">
+                <div class="view-header">
+                    <button class="back-button" data-action="back-home">
+                        <i class="fa-solid fa-arrow-left"></i>
+                    </button>
+                    <h2>Recibir</h2>
+                </div>
+                <div class="receive-container">
+                    <!-- Código QR -->
+                    <div class="receive-section">
+                        <h3 class="receive-section-title">Tu Dirección de Recepción</h3>
+                        <div class="qr-display">
+                            <img src="img/address.png" alt="Código QR de dirección" class="qr-image">
+                        </div>
+                    </div>
+
+                    <!-- Dirección para Copiar -->
+                    <div class="receive-section">
+                        <label class="receive-label">Dirección de la Billetera</label>
+                        <div class="address-display">
+                            <input 
+                                type="text" 
+                                id="receive-address" 
+                                class="address-input"
+                                value="GAV3RM42MHBT3TMIWNXZ6SNUPBYOOZPKP6CFKN2EAFGYY3NVMJ62OGGU"
+                                readonly
+                            >
+                            <button class="copy-address-button" id="copy-address-btn" aria-label="Copiar dirección">
+                                <i class="fa-solid fa-copy"></i>
+                                <span class="copy-text">Copiar</span>
+                            </button>
+                        </div>
+                        <p class="receive-note">
+                            <i class="fa-solid fa-info-circle"></i>
+                            Comparte esta dirección para recibir pagos
+                        </p>
+                    </div>
+
+                    
                 </div>
             </section>
 

@@ -89,16 +89,20 @@
         navItems: null,
         assetDropdown: null,
         sendView: null,
+        receiveView: null,
         sendAssetDropdown: null,
         sendAddress: null,
         sendAmount: null,
         sendAvailableAmount: null,
         sendAmountUsd: null,
         openSendBtn: null,
+        openReceiveBtn: null,
         confirmSendBtn: null,
         scanQrBtn: null,
         maxButton: null,
-        backButtons: null
+        backButtons: null,
+        copyAddressBtn: null,
+        receiveAddress: null
     };
 
     // ===================================
@@ -115,6 +119,7 @@
         initKeypad();
         initAssetSelector();
         initSendForm();
+        initReceiveForm();
         startPriceUpdates();
         
         console.log('✅ Aplicación lista');
@@ -137,16 +142,20 @@
         elements.navItems = document.querySelectorAll('.nav-item');
         elements.assetDropdown = document.getElementById('asset-dropdown');
         elements.sendView = document.getElementById('view-send');
+        elements.receiveView = document.getElementById('view-receive');
         elements.sendAssetDropdown = document.getElementById('send-asset-dropdown');
         elements.sendAddress = document.getElementById('send-address');
         elements.sendAmount = document.getElementById('send-amount');
         elements.sendAvailableAmount = document.getElementById('send-available-amount');
         elements.sendAmountUsd = document.getElementById('send-amount-usd');
         elements.openSendBtn = document.getElementById('open-send-btn');
+        elements.openReceiveBtn = document.getElementById('open-receive-btn');
         elements.confirmSendBtn = document.getElementById('confirm-send-btn');
         elements.scanQrBtn = document.getElementById('scan-qr-btn');
         elements.maxButton = document.getElementById('max-button');
         elements.backButtons = document.querySelectorAll('[data-action="back-home"]');
+        elements.copyAddressBtn = document.getElementById('copy-address-btn');
+        elements.receiveAddress = document.getElementById('receive-address');
     }
 
     // ===================================
@@ -358,6 +367,7 @@
         elements.backButtons.forEach(btn => {
             btn.addEventListener('click', () => {
                 closeSendView();
+                closeReceiveView();
             });
         });
 
@@ -500,6 +510,90 @@
             updateTotalBalance();
             closeSendView();
         }, 1500);
+    }
+
+    // ===================================
+    // VISTA DE RECIBIR
+    // ===================================
+    function initReceiveForm() {
+        if (!elements.openReceiveBtn) return;
+
+        // Abrir vista de recibir
+        elements.openReceiveBtn.addEventListener('click', () => {
+            openReceiveView();
+        });
+
+        // Copiar dirección
+        if (elements.copyAddressBtn && elements.receiveAddress) {
+            elements.copyAddressBtn.addEventListener('click', () => {
+                copyAddressToClipboard();
+            });
+        }
+    }
+
+    function openReceiveView() {
+        elements.onlineMode.classList.remove('active');
+        elements.receiveView.classList.add('active');
+        console.log('📥 Abriendo vista de recibir');
+    }
+
+    function closeReceiveView() {
+        elements.receiveView.classList.remove('active');
+        elements.onlineMode.classList.add('active');
+        console.log('🏠 Volviendo al inicio');
+    }
+
+    function copyAddressToClipboard() {
+        if (!elements.receiveAddress) return;
+
+        const address = elements.receiveAddress.value;
+
+        // Usar la API del portapapeles moderna
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(address)
+                .then(() => {
+                    showNotification('✅ Dirección copiada al portapapeles', 'success');
+                    
+                    // Cambiar el texto del botón temporalmente
+                    const copyText = elements.copyAddressBtn.querySelector('.copy-text');
+                    if (copyText) {
+                        const originalText = copyText.textContent;
+                        copyText.textContent = '¡Copiado!';
+                        setTimeout(() => {
+                            copyText.textContent = originalText;
+                        }, 2000);
+                    }
+                    
+                    console.log('📋 Dirección copiada:', address);
+                })
+                .catch(err => {
+                    console.error('Error al copiar:', err);
+                    fallbackCopy(address);
+                });
+        } else {
+            fallbackCopy(address);
+        }
+    }
+
+    function fallbackCopy(text) {
+        // Método alternativo para navegadores más antiguos
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        textarea.style.position = 'fixed';
+        textarea.style.opacity = '0';
+        document.body.appendChild(textarea);
+        textarea.select();
+        
+        try {
+            document.execCommand('copy');
+            showNotification('✅ Dirección copiada al portapapeles', 'success');
+            console.log('📋 Dirección copiada (fallback):', text);
+        } catch (err) {
+            showNotification('❌ No se pudo copiar la dirección', 'error');
+            console.error('Error al copiar (fallback):', err);
+        }
+        
+        document.body.removeChild(textarea);
     }
 
     // ===================================
