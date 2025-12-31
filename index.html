@@ -124,87 +124,33 @@
                 
                 <!-- Offline Header -->
                 <div class="offline-header">
-                    <div class="offline-badge">
-                        <i class="fa-solid fa-wifi"></i>
-                        <span>Modo Offline - USSD Activo</span>
-                    </div>
+                    
                     <h1>Modo Offline</h1>
                     <p class="offline-subtitle">Operaciones sin conexión a internet</p>
-                    <div class="offline-notice">
-                        <i class="fa-solid fa-info-circle"></i>
-                        <span>Modo de bajo consumo de datos activado</span>
-                    </div>
+                    
                 </div>
 
                 <!-- Offline Content -->
                 <div class="offline-content">
                     
-                    <!-- Available Assets Offline -->
-                    <div class="offline-assets">
-                        <h3>Activos Disponibles Offline</h3>
-                        <div class="offline-assets-list">
-                            <div class="offline-asset-item">
-                                <div class="asset-icon-mini usdc">
-                                    <i class="fa-solid fa-dollar-sign"></i>
-                                </div>
-                                <span>USDC</span>
+                    <!-- Botones de Acción Offline -->
+                    <div class="offline-actions">
+                        <button class="offline-action-button" id="offline-send-btn">
+                            <div class="offline-action-icon send">
+                                <i class="fa-solid fa-paper-plane"></i>
                             </div>
-                            <div class="offline-asset-item">
-                                <div class="asset-icon-mini xlm">
-                                    <i class="fa-solid fa-star"></i>
-                                </div>
-                                <span>XLM</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Numeric Keypad -->
-                    <div class="numeric-keypad">
-                        <div class="keypad-display" id="keypad-display">0.00</div>
-                        <div class="keypad-grid">
-                            <button class="key-number" data-value="1">1</button>
-                            <button class="key-number" data-value="2">2</button>
-                            <button class="key-number" data-value="3">3</button>
-                            <button class="key-number" data-value="4">4</button>
-                            <button class="key-number" data-value="5">5</button>
-                            <button class="key-number" data-value="6">6</button>
-                            <button class="key-number" data-value="7">7</button>
-                            <button class="key-number" data-value="8">8</button>
-                            <button class="key-number" data-value="9">9</button>
-                            <button class="key-special" data-value=".">.</button>
-                            <button class="key-number" data-value="0">0</button>
-                            <button class="key-delete">
-                                <i class="fa-solid fa-delete-left"></i>
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- QR Code Generator -->
-                    <div class="qr-generator">
-                        <h3>Código de Pago Offline</h3>
-                        <div class="qr-code-box">
-                            <div class="qr-pattern">
+                            <span>Enviar</span>
+                        </button>
+                        <button class="offline-action-button" id="offline-receive-btn">
+                            <div class="offline-action-icon receive">
                                 <i class="fa-solid fa-qrcode"></i>
                             </div>
-                        </div>
-                        <p class="qr-info">
-                            <i class="fa-solid fa-clock"></i>
-                            Válido por: 15 minutos | Monto máx: $100.00
-                        </p>
-                        <div class="qr-actions">
-                            <button class="qr-button secondary">
-                                <i class="fa-solid fa-arrows-rotate"></i>
-                                Regenerar
-                            </button>
-                            <button class="qr-button primary">
-                                <i class="fa-solid fa-download"></i>
-                                Guardar QR
-                            </button>
-                        </div>
+                            <span>Recibir</span>
+                        </button>
                     </div>
 
                 </div>
-
+                
             </section>
 
             <!-- ========================================
@@ -569,12 +515,6 @@
                 <span>Ajustes</span>
             </button>
         </nav>
-
-        <!-- FAB: Pagar sin Internet (solo visible en modo offline) -->
-        <button class="fab" id="fab-offline" aria-label="Pagar sin Internet">
-            <i class="fa-solid fa-bolt"></i>
-            <span>Pagar sin Internet</span>
-        </button>
 
     </div>
 

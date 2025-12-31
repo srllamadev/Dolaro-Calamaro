@@ -109,6 +109,8 @@
         sendAmountUsd: null,
         openSendBtn: null,
         openReceiveBtn: null,
+        offlineSendBtn: null,
+        offlineReceiveBtn: null,
         confirmSendBtn: null,
         scanQrBtn: null,
         maxButton: null,
@@ -167,6 +169,8 @@
         elements.sendAmountUsd = document.getElementById('send-amount-usd');
         elements.openSendBtn = document.getElementById('open-send-btn');
         elements.openReceiveBtn = document.getElementById('open-receive-btn');
+        elements.offlineSendBtn = document.getElementById('offline-send-btn');
+        elements.offlineReceiveBtn = document.getElementById('offline-receive-btn');
         elements.confirmSendBtn = document.getElementById('confirm-send-btn');
         elements.scanQrBtn = document.getElementById('scan-qr-btn');
         elements.maxButton = document.getElementById('max-button');
@@ -376,10 +380,22 @@
     function initSendForm() {
         if (!elements.openSendBtn) return;
 
-        // Abrir vista de enviar
+        // Abrir vista de enviar desde online
         elements.openSendBtn.addEventListener('click', () => {
             openSendView();
         });
+
+        // Abrir vista de enviar desde offline
+        if (elements.offlineSendBtn) {
+            elements.offlineSendBtn.addEventListener('click', () => {
+                // Desactivar modo offline
+                if (appState.offlineMode) {
+                    elements.offlineToggle.checked = false;
+                    toggleOfflineMode(false);
+                }
+                openSendView();
+            });
+        }
 
         // Botones de volver
         elements.backButtons.forEach(btn => {
@@ -553,10 +569,22 @@
     function initReceiveForm() {
         if (!elements.openReceiveBtn) return;
 
-        // Abrir vista de recibir
+        // Abrir vista de recibir desde online
         elements.openReceiveBtn.addEventListener('click', () => {
             openReceiveView();
         });
+
+        // Abrir vista de recibir desde offline
+        if (elements.offlineReceiveBtn) {
+            elements.offlineReceiveBtn.addEventListener('click', () => {
+                // Desactivar modo offline
+                if (appState.offlineMode) {
+                    elements.offlineToggle.checked = false;
+                    toggleOfflineMode(false);
+                }
+                openReceiveView();
+            });
+        }
 
         // Copiar dirección
         if (elements.copyAddressBtn && elements.receiveAddress) {
