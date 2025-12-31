@@ -127,7 +127,12 @@
         exchangeFromAmount: null,
         exchangeToAmount: null,
         confirmExchangeBtn: null,
-        swapAssetsBtn: null
+        swapAssetsBtn: null,
+        pinModal: null,
+        pinInput: null,
+        pinConfirmBtn: null,
+        pinCancelBtn: null,
+        pinToggleBtn: null
     };
 
     // ===================================
@@ -193,6 +198,11 @@
         elements.btnMore = document.getElementById('btn-more');
         elements.exchangeView = document.getElementById('view-exchange');
         elements.moreView = document.getElementById('view-more');
+        elements.pinModal = document.getElementById('pin-modal');
+        elements.pinInput = document.getElementById('pin-input');
+        elements.pinConfirmBtn = document.getElementById('pin-confirm-btn');
+        elements.pinCancelBtn = document.getElementById('pin-cancel-btn');
+        elements.pinToggleBtn = document.getElementById('pin-toggle-visibility');
         elements.exchangeFromAsset = document.getElementById('exchange-from-asset');
         elements.exchangeToAsset = document.getElementById('exchange-to-asset');
         elements.exchangeFromAmount = document.getElementById('exchange-from-amount');
@@ -412,12 +422,11 @@
         // Abrir vista de enviar desde offline
         if (elements.offlineSendBtn) {
             elements.offlineSendBtn.addEventListener('click', () => {
-                // Desactivar modo offline
-                if (appState.offlineMode) {
-                    elements.offlineToggle.checked = false;
-                    toggleOfflineMode(false);
-                }
-                openSendView();
+                console.log('📤 Abrir enviar desde modo offline');
+                // Cerrar vista offline y abrir vista de enviar
+                elements.offlineMode.classList.remove('active');
+                elements.sendView.classList.add('active');
+                updateSendAvailableBalance();
             });
         }
 
@@ -493,15 +502,19 @@
         if (!elements.sendView) return;
         if (elements.sendView.classList.contains('active')) {
             elements.sendView.classList.remove('active');
-            if (elements.onlineMode && !appState.offlineMode) {
+            
+            // Volver a la vista correcta según el estado
+            if (appState.offlineMode) {
+                elements.offlineMode.classList.add('active');
+                updateNavigation('offline');
+            } else if (elements.onlineMode) {
                 elements.onlineMode.classList.add('active');
+                updateNavigation('home');
             }
+            
             // Limpiar formulario
             if (elements.sendAddress) elements.sendAddress.value = '';
             if (elements.sendAmount) elements.sendAmount.value = '';
-            
-            // Activar botón de inicio
-            updateNavigation('home');
             
             console.log('📤 Vista de enviar cerrada');
         }
@@ -571,6 +584,96 @@
             return;
         }
 
+        // Solicitar PIN antes de procesar
+        requestPinAndSend(asset, address, amount);
+    }
+
+    function requestPinAndSend(asset, address, amount) {
+        openPinModal((enteredPin) => {
+            if (enteredPin === '000000') {
+                // PIN correcto, proceder con el envío
+                executeSend(asset, address, amount);
+            } else {
+                // PIN incorrecto
+                showNotification('❌ PIN incorrecto. Intenta nuevamente', 'error');
+            }
+        });
+    }
+
+    function openPinModal(callback) {
+        if (!elements.pinModal) return;
+        
+        // Limpiar input
+        elements.pinInput.value = '';
+        elements.pinInput.type = 'password';
+        elements.pinToggleBtn.querySelector('i').className = 'fa-solid fa-eye';
+        
+        // Mostrar modal
+        elements.pinModal.classList.add('active');
+        
+        // Focus en el input
+        setTimeout(() => {
+            elements.pinInput.focus();
+        }, 100);
+        
+        // Función para cerrar el modal
+        const closeModal = () => {
+            elements.pinModal.classList.remove('active');
+            elements.pinInput.value = '';
+        };
+        
+        // Botón confirmar
+        const confirmHandler = () => {
+            const pin = elements.pinInput.value.trim();
+            closeModal();
+            if (callback) callback(pin);
+            
+            // Remover listeners
+            elements.pinConfirmBtn.removeEventListener('click', confirmHandler);
+            elements.pinCancelBtn.removeEventListener('click', cancelHandler);
+            elements.pinInput.removeEventListener('keypress', keypressHandler);
+        };
+        
+        // Botón cancelar
+        const cancelHandler = () => {
+            closeModal();
+            showNotification('❌ Envío cancelado', 'info');
+            
+            // Remover listeners
+            elements.pinConfirmBtn.removeEventListener('click', confirmHandler);
+            elements.pinCancelBtn.removeEventListener('click', cancelHandler);
+            elements.pinInput.removeEventListener('keypress', keypressHandler);
+        };
+        
+        // Enter para confirmar
+        const keypressHandler = (e) => {
+            if (e.key === 'Enter') {
+                confirmHandler();
+            }
+        };
+        
+        // Agregar event listeners
+        elements.pinConfirmBtn.addEventListener('click', confirmHandler);
+        elements.pinCancelBtn.addEventListener('click', cancelHandler);
+        elements.pinInput.addEventListener('keypress', keypressHandler);
+        
+        // Toggle visibilidad del PIN
+        const toggleVisibility = () => {
+            const icon = elements.pinToggleBtn.querySelector('i');
+            if (elements.pinInput.type === 'password') {
+                elements.pinInput.type = 'text';
+                icon.className = 'fa-solid fa-eye-slash';
+            } else {
+                elements.pinInput.type = 'password';
+                icon.className = 'fa-solid fa-eye';
+            }
+        };
+        
+        elements.pinToggleBtn.removeEventListener('click', toggleVisibility);
+        elements.pinToggleBtn.addEventListener('click', toggleVisibility);
+    }
+
+    function executeSend(asset, address, amount) {
         // Simular envío
         showNotification(`⏳ Enviando ${amount} ${asset.name}...`, 'info');
         
@@ -603,12 +706,10 @@
         // Abrir vista de recibir desde offline
         if (elements.offlineReceiveBtn) {
             elements.offlineReceiveBtn.addEventListener('click', () => {
-                // Desactivar modo offline
-                if (appState.offlineMode) {
-                    elements.offlineToggle.checked = false;
-                    toggleOfflineMode(false);
-                }
-                openReceiveView();
+                console.log('📥 Abrir recibir desde modo offline');
+                // Cerrar vista offline y abrir vista de recibir
+                elements.offlineMode.classList.remove('active');
+                elements.receiveView.classList.add('active');
             });
         }
 
@@ -638,12 +739,15 @@
         if (!elements.receiveView) return;
         if (elements.receiveView.classList.contains('active')) {
             elements.receiveView.classList.remove('active');
-            if (elements.onlineMode && !appState.offlineMode) {
-                elements.onlineMode.classList.add('active');
-            }
             
-            // Activar botón de inicio
-            updateNavigation('home');
+            // Volver a la vista correcta según el estado
+            if (appState.offlineMode) {
+                elements.offlineMode.classList.add('active');
+                updateNavigation('offline');
+            } else if (elements.onlineMode) {
+                elements.onlineMode.classList.add('active');
+                updateNavigation('home');
+            }
             
             console.log('📥 Vista de recibir cerrada');
         }

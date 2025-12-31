@@ -665,6 +665,37 @@
 
         </main>
 
+        <!-- Modal de PIN -->
+        <div id="pin-modal" class="pin-modal">
+            <div class="pin-modal-overlay"></div>
+            <div class="pin-modal-content">
+                <div class="pin-modal-header">
+                    <i class="fa-solid fa-lock"></i>
+                    <h3>Verificación de Seguridad</h3>
+                    <p>Ingresa tu PIN para continuar</p>
+                </div>
+                <div class="pin-modal-body">
+                    <div class="pin-input-container">
+                        <input type="password" id="pin-input" class="pin-input" maxlength="6" placeholder="000000" autocomplete="off">
+                        <button id="pin-toggle-visibility" class="pin-toggle-btn">
+                            <i class="fa-solid fa-eye"></i>
+                        </button>
+                    </div>
+                    <div class="pin-hint">PIN de prueba: 000000</div>
+                </div>
+                <div class="pin-modal-footer">
+                    <button id="pin-cancel-btn" class="pin-btn pin-btn-cancel">
+                        <i class="fa-solid fa-xmark"></i>
+                        Cancelar
+                    </button>
+                    <button id="pin-confirm-btn" class="pin-btn pin-btn-confirm">
+                        <i class="fa-solid fa-check"></i>
+                        Confirmar
+                    </button>
+                </div>
+            </div>
+        </div>
+
         <!-- Navegación Inferior -->
         <nav class="bottom-nav">
             <button class="nav-item active" data-view="home">
