@@ -79,13 +79,13 @@
                             </div>
                             <span>Recibir</span>
                         </button>
-                        <button class="action-button">
+                        <button class="action-button" id="btn-exchange">
                             <div class="action-icon exchange">
                                 <i class="fa-solid fa-right-left"></i>
                             </div>
                             <span>Canjear</span>
                         </button>
-                        <button class="action-button">
+                        <button class="action-button" id="btn-more">
                             <div class="action-icon more">
                                 <i class="fa-solid fa-ellipsis"></i>
                             </div>
@@ -491,6 +491,175 @@
                         <i class="fa-solid fa-right-from-bracket"></i>
                         Cerrar Sesión
                     </button>
+                </div>
+            </section>
+
+            <!-- ========================================
+                 VISTA: CANJEAR
+                 ======================================== -->
+            <section id="view-exchange" class="view">
+                <div class="view-header">
+                    <button class="back-button" data-action="back-home">
+                        <i class="fa-solid fa-arrow-left"></i>
+                    </button>
+                    <h2>Canjear Activos</h2>
+                    <div style="width: 40px;"></div>
+                </div>
+
+                <div class="exchange-container">
+                    <!-- Activo a enviar -->
+                    <div class="exchange-section">
+                        <label class="exchange-label">Envías</label>
+                        <div class="exchange-card">
+                            <select id="exchange-from-asset" class="exchange-asset-select">
+                                <option value="usdc">USDC - USD Coin</option>
+                                <option value="xlm">XLM - Stellar</option>
+                                <option value="audd">AUDD - Australian Dollar</option>
+                                <option value="gyen">GYEN - Japanese Yen</option>
+                                <option value="eurc">EURC - Euro Coin</option>
+                                <option value="zusd">zUSD - Zebec Dollar</option>
+                            </select>
+                            <input type="number" id="exchange-from-amount" class="exchange-amount-input" placeholder="0.00">
+                            <div class="exchange-balance">
+                                Disponible: <span id="exchange-from-balance">0.00</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Botón de intercambio -->
+                    <div class="exchange-swap-icon">
+                        <button id="swap-assets-btn" class="swap-button">
+                            <i class="fa-solid fa-arrow-down-arrow-up"></i>
+                        </button>
+                    </div>
+
+                    <!-- Activo a recibir -->
+                    <div class="exchange-section">
+                        <label class="exchange-label">Recibes</label>
+                        <div class="exchange-card">
+                            <select id="exchange-to-asset" class="exchange-asset-select">
+                                <option value="xlm">XLM - Stellar</option>
+                                <option value="usdc">USDC - USD Coin</option>
+                                <option value="audd">AUDD - Australian Dollar</option>
+                                <option value="gyen">GYEN - Japanese Yen</option>
+                                <option value="eurc">EURC - Euro Coin</option>
+                                <option value="zusd">zUSD - Zebec Dollar</option>
+                            </select>
+                            <input type="number" id="exchange-to-amount" class="exchange-amount-input" placeholder="0.00" readonly>
+                            <div class="exchange-rate">
+                                Tasa: <span id="exchange-rate-display">1:1</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Información de la transacción -->
+                    <div class="exchange-info">
+                        <div class="exchange-info-row">
+                            <span>Tasa de cambio</span>
+                            <span id="exchange-rate-detail">--</span>
+                        </div>
+                        <div class="exchange-info-row">
+                            <span>Comisión de red</span>
+                            <span>0.001 XLM</span>
+                        </div>
+                        <div class="exchange-info-row">
+                            <span>Total a recibir</span>
+                            <span id="exchange-total-receive">0.00</span>
+                        </div>
+                    </div>
+
+                    <!-- Botón de confirmación -->
+                    <button id="confirm-exchange-btn" class="primary-button">
+                        <i class="fa-solid fa-right-left"></i>
+                        Confirmar Canje
+                    </button>
+                </div>
+            </section>
+
+            <!-- ========================================
+                 VISTA: MÁS OPCIONES
+                 ======================================== -->
+            <section id="view-more" class="view">
+                <div class="view-header">
+                    <button class="back-button" data-action="back-home">
+                        <i class="fa-solid fa-arrow-left"></i>
+                    </button>
+                    <h2>Más Opciones</h2>
+                    <div style="width: 40px;"></div>
+                </div>
+
+                <div class="more-container">
+                    <!-- Historial -->
+                    <div class="more-option-card">
+                        <div class="more-option-icon">
+                            <i class="fa-solid fa-clock-rotate-left"></i>
+                        </div>
+                        <div class="more-option-content">
+                            <h3>Historial de Transacciones</h3>
+                            <p>Ver todas tus transacciones realizadas</p>
+                        </div>
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </div>
+
+                    <!-- Exportar clave -->
+                    <div class="more-option-card">
+                        <div class="more-option-icon">
+                            <i class="fa-solid fa-key"></i>
+                        </div>
+                        <div class="more-option-content">
+                            <h3>Exportar Clave Privada</h3>
+                            <p>Respalda tu clave de forma segura</p>
+                        </div>
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </div>
+
+                    <!-- Compartir dirección -->
+                    <div class="more-option-card">
+                        <div class="more-option-icon">
+                            <i class="fa-solid fa-share-nodes"></i>
+                        </div>
+                        <div class="more-option-content">
+                            <h3>Compartir Dirección</h3>
+                            <p>Comparte tu dirección de wallet</p>
+                        </div>
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </div>
+
+                    <!-- Cambiar tema -->
+                    <div class="more-option-card">
+                        <div class="more-option-icon">
+                            <i class="fa-solid fa-palette"></i>
+                        </div>
+                        <div class="more-option-content">
+                            <h3>Cambiar Tema</h3>
+                            <p>Personaliza la apariencia de la app</p>
+                        </div>
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </div>
+
+                    <!-- Soporte -->
+                    <div class="more-option-card">
+                        <div class="more-option-icon">
+                            <i class="fa-solid fa-headset"></i>
+                        </div>
+                        <div class="more-option-content">
+                            <h3>Soporte Técnico</h3>
+                            <p>Obtén ayuda con tu cuenta</p>
+                        </div>
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </div>
+
+                    <!-- Términos -->
+                    <div class="more-option-card">
+                        <div class="more-option-icon">
+                            <i class="fa-solid fa-file-contract"></i>
+                        </div>
+                        <div class="more-option-content">
+                            <h3>Términos y Condiciones</h3>
+                            <p>Lee nuestros términos de servicio</p>
+                        </div>
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </div>
                 </div>
             </section>
 

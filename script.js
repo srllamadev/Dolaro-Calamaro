@@ -117,7 +117,17 @@
         backButtons: null,
         copyAddressBtn: null,
         receiveAddress: null,
-        priceChart: null
+        priceChart: null,
+        btnExchange: null,
+        btnMore: null,
+        exchangeView: null,
+        moreView: null,
+        exchangeFromAsset: null,
+        exchangeToAsset: null,
+        exchangeFromAmount: null,
+        exchangeToAmount: null,
+        confirmExchangeBtn: null,
+        swapAssetsBtn: null
     };
 
     // ===================================
@@ -137,6 +147,7 @@
         initReceiveForm();
         initMarketView();
         initSettingsView();
+        initActionButtons();
         startPriceUpdates();
         
         console.log('✅ Aplicación lista');
@@ -178,6 +189,16 @@
         elements.copyAddressBtn = document.getElementById('copy-address-btn');
         elements.receiveAddress = document.getElementById('receive-address');
         elements.priceChart = document.getElementById('price-chart');
+        elements.btnExchange = document.getElementById('btn-exchange');
+        elements.btnMore = document.getElementById('btn-more');
+        elements.exchangeView = document.getElementById('view-exchange');
+        elements.moreView = document.getElementById('view-more');
+        elements.exchangeFromAsset = document.getElementById('exchange-from-asset');
+        elements.exchangeToAsset = document.getElementById('exchange-to-asset');
+        elements.exchangeFromAmount = document.getElementById('exchange-from-amount');
+        elements.exchangeToAmount = document.getElementById('exchange-to-amount');
+        elements.confirmExchangeBtn = document.getElementById('confirm-exchange-btn');
+        elements.swapAssetsBtn = document.getElementById('swap-assets-btn');
     }
 
     // ===================================
@@ -405,6 +426,8 @@
             btn.addEventListener('click', () => {
                 closeSendView();
                 closeReceiveView();
+                closeExchangeView();
+                closeMoreView();
             });
         });
 
@@ -626,6 +649,36 @@
         }
     }
 
+    function closeExchangeView() {
+        if (!elements.exchangeView) return;
+        if (elements.exchangeView.classList.contains('active')) {
+            elements.exchangeView.classList.remove('active');
+            if (elements.onlineMode && !appState.offlineMode) {
+                elements.onlineMode.classList.add('active');
+            }
+            
+            // Activar botón de inicio
+            updateNavigation('home');
+            
+            console.log('💱 Vista de canjear cerrada');
+        }
+    }
+
+    function closeMoreView() {
+        if (!elements.moreView) return;
+        if (elements.moreView.classList.contains('active')) {
+            elements.moreView.classList.remove('active');
+            if (elements.onlineMode && !appState.offlineMode) {
+                elements.onlineMode.classList.add('active');
+            }
+            
+            // Activar botón de inicio
+            updateNavigation('home');
+            
+            console.log('➕ Vista de más opciones cerrada');
+        }
+    }
+
     function copyAddressToClipboard() {
         if (!elements.receiveAddress) return;
 
@@ -815,6 +868,8 @@
         if (elements.receiveView) elements.receiveView.classList.remove('active');
         if (elements.marketView) elements.marketView.classList.remove('active');
         if (elements.settingsView) elements.settingsView.classList.remove('active');
+        if (elements.exchangeView) elements.exchangeView.classList.remove('active');
+        if (elements.moreView) elements.moreView.classList.remove('active');
     }
 
     function updateNavigation(activeView) {
@@ -1200,6 +1255,222 @@
                     }, 1000);
                 }
             });
+        }
+    }
+
+    // ===================================
+    // BOTONES DE ACCIÓN (CANJEAR Y MÁS)
+    // ===================================
+    function initActionButtons() {
+        // Botón Canjear
+        if (elements.btnExchange) {
+            elements.btnExchange.addEventListener('click', () => {
+                console.log('💱 Abrir vista de canjear');
+                openExchangeView();
+            });
+        }
+
+        // Botón Más
+        if (elements.btnMore) {
+            elements.btnMore.addEventListener('click', () => {
+                console.log('➕ Abrir vista de más opciones');
+                openMoreView();
+            });
+        }
+
+        // Botón de swap en exchange
+        if (elements.swapAssetsBtn) {
+            elements.swapAssetsBtn.addEventListener('click', () => {
+                swapExchangeAssets();
+            });
+        }
+
+        // Input de cantidad en exchange
+        if (elements.exchangeFromAmount) {
+            elements.exchangeFromAmount.addEventListener('input', () => {
+                calculateExchangeAmount();
+            });
+        }
+
+        // Cambio de activo en exchange
+        if (elements.exchangeFromAsset) {
+            elements.exchangeFromAsset.addEventListener('change', () => {
+                updateExchangeBalance();
+                calculateExchangeAmount();
+            });
+        }
+
+        if (elements.exchangeToAsset) {
+            elements.exchangeToAsset.addEventListener('change', () => {
+                calculateExchangeAmount();
+            });
+        }
+
+        // Confirmar exchange
+        if (elements.confirmExchangeBtn) {
+            elements.confirmExchangeBtn.addEventListener('click', () => {
+                confirmExchange();
+            });
+        }
+
+        // Click en las opciones de "Más"
+        const moreOptions = document.querySelectorAll('.more-option-card');
+        moreOptions.forEach((option, index) => {
+            option.addEventListener('click', () => {
+                handleMoreOption(index);
+            });
+        });
+    }
+
+    function openExchangeView() {
+        closeAllViews();
+        elements.exchangeView.classList.add('active');
+        updateExchangeBalance();
+        calculateExchangeAmount();
+    }
+
+    function openMoreView() {
+        closeAllViews();
+        elements.moreView.classList.add('active');
+    }
+
+    function swapExchangeAssets() {
+        const fromValue = elements.exchangeFromAsset.value;
+        const toValue = elements.exchangeToAsset.value;
+        
+        elements.exchangeFromAsset.value = toValue;
+        elements.exchangeToAsset.value = fromValue;
+        
+        updateExchangeBalance();
+        calculateExchangeAmount();
+        
+        showNotification('🔄 Activos intercambiados', 'success');
+    }
+
+    function updateExchangeBalance() {
+        const selectedAssetId = elements.exchangeFromAsset.value;
+        const asset = assetsData.find(a => a.id === selectedAssetId);
+        
+        if (asset) {
+            const balanceElement = document.getElementById('exchange-from-balance');
+            if (balanceElement) {
+                balanceElement.textContent = `${asset.amount} ${asset.symbol}`;
+            }
+        }
+    }
+
+    function calculateExchangeAmount() {
+        const fromAmount = parseFloat(elements.exchangeFromAmount.value) || 0;
+        const fromAssetId = elements.exchangeFromAsset.value;
+        const toAssetId = elements.exchangeToAsset.value;
+        
+        const fromAsset = assetsData.find(a => a.id === fromAssetId);
+        const toAsset = assetsData.find(a => a.id === toAssetId);
+        
+        if (fromAsset && toAsset && fromAmount > 0) {
+            // Calcular tasa de cambio basada en valores USD
+            const fromUsdValue = fromAsset.usdValue / fromAsset.amount;
+            const toUsdValue = toAsset.usdValue / toAsset.amount;
+            const exchangeRate = fromUsdValue / toUsdValue;
+            
+            const toAmount = fromAmount * exchangeRate;
+            
+            elements.exchangeToAmount.value = toAmount.toFixed(6);
+            
+            // Actualizar información
+            const rateDisplay = document.getElementById('exchange-rate-display');
+            const rateDetail = document.getElementById('exchange-rate-detail');
+            const totalReceive = document.getElementById('exchange-total-receive');
+            
+            if (rateDisplay) {
+                rateDisplay.textContent = `1 ${fromAsset.symbol} = ${exchangeRate.toFixed(6)} ${toAsset.symbol}`;
+            }
+            
+            if (rateDetail) {
+                rateDetail.textContent = `${exchangeRate.toFixed(6)} ${toAsset.symbol}`;
+            }
+            
+            if (totalReceive) {
+                totalReceive.textContent = `${toAmount.toFixed(6)} ${toAsset.symbol}`;
+            }
+        } else {
+            elements.exchangeToAmount.value = '';
+            const rateDisplay = document.getElementById('exchange-rate-display');
+            if (rateDisplay) rateDisplay.textContent = '1:1';
+        }
+    }
+
+    function confirmExchange() {
+        const fromAmount = parseFloat(elements.exchangeFromAmount.value) || 0;
+        const fromAssetId = elements.exchangeFromAsset.value;
+        const toAssetId = elements.exchangeToAsset.value;
+        const toAmount = parseFloat(elements.exchangeToAmount.value) || 0;
+        
+        const fromAsset = assetsData.find(a => a.id === fromAssetId);
+        const toAsset = assetsData.find(a => a.id === toAssetId);
+        
+        if (!fromAsset || !toAsset) {
+            showNotification('❌ Por favor selecciona activos válidos', 'error');
+            return;
+        }
+        
+        if (fromAmount <= 0) {
+            showNotification('❌ Ingresa una cantidad válida', 'error');
+            return;
+        }
+        
+        if (fromAmount > fromAsset.amount) {
+            showNotification('❌ Fondos insuficientes', 'error');
+            return;
+        }
+        
+        const message = `¿Confirmar canje?\n\n` +
+            `Envías: ${fromAmount} ${fromAsset.symbol}\n` +
+            `Recibes: ${toAmount.toFixed(6)} ${toAsset.symbol}\n\n` +
+            `Esta acción no se puede deshacer.`;
+        
+        if (confirm(message)) {
+            // Simular canje
+            fromAsset.amount -= fromAmount;
+            fromAsset.usdValue = fromAsset.amount * (fromAsset.usdValue / (fromAsset.amount + fromAmount));
+            
+            toAsset.amount += toAmount;
+            toAsset.usdValue = toAsset.amount * (toAsset.usdValue / (toAsset.amount - toAmount));
+            
+            showNotification('✅ Canje realizado con éxito', 'success');
+            
+            // Actualizar UI
+            renderPortfolio();
+            updateTotalBalance();
+            
+            // Limpiar formulario
+            elements.exchangeFromAmount.value = '';
+            elements.exchangeToAmount.value = '';
+            updateExchangeBalance();
+            
+            // Volver al inicio después de 1.5 segundos
+            setTimeout(() => {
+                closeAllViews();
+                elements.onlineMode.classList.add('active');
+                updateNavigation('home');
+            }, 1500);
+        }
+    }
+
+    function handleMoreOption(index) {
+        const options = [
+            { title: 'Historial de Transacciones', icon: '📊' },
+            { title: 'Exportar Clave Privada', icon: '🔐' },
+            { title: 'Compartir Dirección', icon: '📱' },
+            { title: 'Cambiar Tema', icon: '🎨' },
+            { title: 'Soporte Técnico', icon: '📞' },
+            { title: 'Términos y Condiciones', icon: '📄' }
+        ];
+        
+        const option = options[index];
+        if (option) {
+            showNotification(`${option.icon} ${option.title} - Próximamente`, 'info');
+            console.log(`Opción seleccionada: ${option.title}`);
         }
     }
 
